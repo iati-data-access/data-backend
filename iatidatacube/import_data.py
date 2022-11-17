@@ -89,6 +89,24 @@ def drop_db():
     db.drop_all()
 
 
+def delete_dataset(csv_file):
+    dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
+    if dataset_type == 'budget':
+        statement = sa.delete(IATILine).where(
+            IATILine.recipient_country_or_region==dataset_country
+        ).where(
+            IATILine.transaction_type=='budget'
+        )
+        db.session.execute(statement)
+    else:
+        statement = sa.delete(IATILine).where(
+            IATILine.recipient_country_or_region==dataset_country
+        ).where(
+            IATILine.transaction_type!='budget'
+        )
+        db.session.execute(statement)
+
+
 def add_row_from_csv(row, codelists, reporting_organisation):
     il = IATILine()
     for key, value in row.items():
@@ -164,6 +182,8 @@ def get_reporting_org(reporting_orgs, row):
 
 
 def import_from_csv(csv_file, codelists):
+    print(f"Deleting existing dataset for {csv_file}")
+    delete_dataset(csv_file)
     print(f"Loading {csv_file}")
     langs = ['en']
 
