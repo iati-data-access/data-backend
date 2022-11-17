@@ -89,7 +89,7 @@ def drop_db():
     db.drop_all()
 
 
-def add_row_from_csv(row, codelists):
+def add_row_from_csv(row, codelists, reporting_organisation):
     il = IATILine()
     for key, value in row.items():
         map_keys = {
@@ -111,12 +111,7 @@ def add_row_from_csv(row, codelists):
         elif _key in ('value_usd', 'value_eur', 'value_local_currrency'):
             setattr(il, _key, float(value))
         elif _key in ("reporting_org#en"):
-            ro = get_groups_or_none(re.match(r"(.*) \[(.*)\]",
-                value), 1)
-            if ro not in codelists['reporting_organisation']:
-                print(f"Reporting organisation {ro} not recognised, skipping.")
-                return
-            il.reporting_organisation = ro
+            il.reporting_organisation = reporting_organisation
         elif _key in ("aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector"):
             if value not in codelists[_key]:
@@ -150,9 +145,20 @@ def import_activities(df):
     db.session.commit()
 
 
+def get_reporting_org(reporting_orgs, row):
+    ro_row = row['reporting_org#en']
+    if ro_row not in reporting_orgs:
+        ro_row_ref = get_groups_or_none(re.match(r"(.*) \[(.*)\]",
+                ro_row), 1)
+        reporting_orgs[ro_row] = ro_row_ref
+    return reporting_orgs, reporting_orgs.get(ro_row)
+
+
 def import_from_csv(csv_file, codelists):
     print(f"Loading {csv_file}")
     langs = ['en']
+
+    start = time.time()
     CSV_HEADERS = iatiflattener.lib.variables.headers(langs)
     _DTYPES = iatiflattener.lib.variables.dtypes(langs)
     headers = iatiflattener.lib.variables.group_by_headers_with_langs(langs)
@@ -164,18 +170,30 @@ def import_from_csv(csv_file, codelists):
     df = df.groupby(headers)
     df = df.agg({'value_usd':'sum','value_eur':'sum','value_local':'sum'})
     df = df.reset_index()
-
+    end = time.time()
+    print(f"Reading data took {end-start}s")
+    start = time.time()
     import_activities(df)
+    end = time.time()
+    print(f"Loading activities took {end-start}s")
 
+    start = time.time()
+    reporting_orgs = {}
     for i, row in df.iterrows():
+        reporting_orgs, reporting_org = get_reporting_org(reporting_orgs, row)
+        if reporting_org not in codelists['reporting_organisation']:
+            print(f"Reporting organisation {reporting_org} not recognised, skipping.")
+            continue
         try:
-            add_row_from_csv(row, codelists)
+            add_row_from_csv(row, codelists, reporting_org)
         except Exception as e:
             print(f"Couldn't add row {i}, exception was {e}")
             db.session.rollback()
         if i % 1000 == 0:
             db.session.commit()
     db.session.commit()
+    end = time.time()
+    print(f"Committing rows took {end-start}s")
 
 
 def fetch_data():
@@ -189,7 +207,7 @@ def process_data():
         langs=langs)
 
 
-def import_all(start_at=''):
+def import_all(start_at='', end_at=''):
     langs = ['en']
     codelists = {
         "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
@@ -204,6 +222,7 @@ def import_all(start_at=''):
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
         start = False
+    else: start = True
     for csv_file in files_to_import:
         if not csv_file.endswith('.csv'): continue
         if (csv_file != start_at) and (start == False):
@@ -212,3 +231,4 @@ def import_all(start_at=''):
         import_from_csv(csv_file, codelists)
         end = time.time()
         print(f"Processed {csv_file} in {end-start}s")
+        if (csv_file == end_at): break

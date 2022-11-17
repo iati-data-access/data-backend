@@ -30,10 +30,11 @@ def drop_all():
 
 @click.command()
 @click.option('-s', 'start_at', default='')
+@click.option('-e', 'end_at', default='')
 @with_appcontext
-def update(start_at):
+def update(start_at, end_at):
     """Updates all processed data."""
-    import_all(start_at)
+    import_all(start_at, end_at)
 
 
 @click.command()
