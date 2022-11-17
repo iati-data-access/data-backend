@@ -88,7 +88,7 @@ def drop_db():
     db.drop_all()
 
 
-def add_row_from_csv(row, known_reporting_organisations, known_iati_identifiers):
+def add_row_from_csv(row, codelists, known_iati_identifiers):
     il = IATILine()
     for key, value in row.items():
         map_keys = {
@@ -112,10 +112,15 @@ def add_row_from_csv(row, known_reporting_organisations, known_iati_identifiers)
         elif _key in ("reporting_org#en"):
             ro = get_groups_or_none(re.match(r"(.*) \[(.*)\]",
                 value), 1)
-            if ro not in known_reporting_organisations:
+            if ro not in codelists['reporting_organisation']:
                 print(f"Reporting organisation {ro} not recognised, skipping.")
-                return
+                return known_iati_identifiers
             il.reporting_organisation = ro
+        elif _key in ("aid_type", "finance_type", "flow_type",
+            "transaction_type", "sector_category", "sector"):
+            if value not in codelists[_key]:
+                value = None
+            setattr(il, _key, value)
         elif _key in ("reporting_organisation_type",
             "provider_organisation",
             "provider_organisation_type",
@@ -139,7 +144,7 @@ def add_row_from_csv(row, known_reporting_organisations, known_iati_identifiers)
     return known_iati_identifiers
 
 
-def import_from_csv(csv_file, known_reporting_organisations):
+def import_from_csv(csv_file, codelists):
     print(f"Loading {csv_file}")
     langs = ['en']
     CSV_HEADERS = iatiflattener.lib.variables.headers(langs)
@@ -147,6 +152,9 @@ def import_from_csv(csv_file, known_reporting_organisations):
     headers = iatiflattener.lib.variables.group_by_headers_with_langs(langs)
     CSV_HEADER_DTYPES = dict(map(lambda csv_header: (csv_header[1], _DTYPES[csv_header[0]]), enumerate(CSV_HEADERS)))
     df = pd.read_csv(os.path.join('output', 'csv', csv_file), dtype=CSV_HEADER_DTYPES)
+    all_relevant_headers = headers + ['value_usd', 'value_eur', 'value_local']
+    df = df[all_relevant_headers]
+    df = df.fillna('')
     df = df.groupby(headers)
     df = df.agg({'value_usd':'sum','value_eur':'sum','value_local':'sum'})
     df = df.reset_index()
@@ -155,7 +163,7 @@ def import_from_csv(csv_file, known_reporting_organisations):
     known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(IATIActivity.iati_identifier).all()]
     for i, row in df.iterrows():
         try:
-            known_iati_identifiers = add_row_from_csv(row, known_reporting_organisations, known_iati_identifiers)
+            known_iati_identifiers = add_row_from_csv(row, codelists, known_iati_identifiers)
         except Exception as e:
             print(f"Couldn't add row {i}, exception was {e}")
             db.session.rollback()
@@ -176,11 +184,20 @@ def process_data():
 
 def import_all():
     langs = ['en']
-    known_reporting_organisations = [ro.code for ro in ReportingOrganisation.query.all()]
+    codelists = {
+        "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
+        "aid_type": [item.code for item in AidType.query.all()],
+        "finance_type": [item.code for item in FinanceType.query.all()],
+        "flow_type": [item.code for item in FlowType.query.all()],
+        "transaction_type": [item.code for item in TransactionType.query.all()],
+        "sector_category": [item.code for item in SectorCategory.query.all()],
+        "sector": [item.code for item in Sector.query.all()],
+        "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
+    }
     files_to_import = sorted(os.listdir('output/csv/'))
     for csv_file in files_to_import:
         if not csv_file.endswith('.csv'): continue
         start = time.time()
-        import_from_csv(csv_file, known_reporting_organisations)
+        import_from_csv(csv_file, codelists)
         end = time.time()
         print(f"Processed {csv_file} in {end-start}s")
