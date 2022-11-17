@@ -11,7 +11,7 @@ act_ForeignKey = ft.partial(
 class ReportingOrganisation(db.Model):
     __tablename__="reporting_organisation"
     code = sa.Column(sa.UnicodeText, primary_key=True)
-    type = sa.Column(sa.Integer, nullable=False, index=True)
+    type = sa.Column(sa.Integer, nullable=True, index=True)
     name_en = sa.Column(sa.UnicodeText,
         nullable=False)
     name_fr = sa.Column(sa.UnicodeText,
