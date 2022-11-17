@@ -1,6 +1,7 @@
 import requests
 from iatidatacube.models import *
 from iatidatacube.extensions import db
+import iatiflattener
 
 codelists_url = "https://codelists.codeforiati.org/api/json/{}/{}.json"
 
@@ -19,7 +20,15 @@ def get_multilang_codelist(codelist_name,
             codelist[code][f'name_{lang}'] = req_data.get(code) or data['name_en']
     return codelist
 
-def write_codelist_values(codelist_name, codelist):
+def write_codelist_values(codelist_name, codelist, with_no_data=True):
+    translations = iatiflattener.lib.variables.TRANSLATIONS
+    if with_no_data is True:
+        codelist[''] = {
+            'name_en': translations.get('en').get('no-data'),
+            'name_fr': translations.get('fr').get('no-data'),
+            'name_es': translations.get('es').get('no-data'),
+            'name_pt': translations.get('pt').get('no-data')
+        }
     for code, names in codelist.items():
         cl = eval(f"{codelist_name}()")
         cl.code = code
@@ -30,7 +39,7 @@ def write_codelist_values(codelist_name, codelist):
 
 def import_codelist(codelist_name):
     codelist = get_multilang_codelist(codelist_name)
-    write_codelist_values(codelist_name, codelist)
+    write_codelist_values(codelist_name, codelist, True)
     db.session.commit()
 
 
@@ -44,14 +53,14 @@ def import_codelists():
     countries = get_multilang_codelist("Country")
     regions = get_multilang_codelist("Region")
     write_codelist_values("RecipientCountryorRegion", countries)
-    write_codelist_values("RecipientCountryorRegion", regions)
+    write_codelist_values("RecipientCountryorRegion", regions, False)
     budget_tt = {'budget': {
         'name_en': 'Budget',
         'name_fr': 'Budget',
         'name_es': 'Budget',
         'name_pt': 'Budget'
     }}
-    write_codelist_values("TransactionType", budget_tt)
+    write_codelist_values("TransactionType", budget_tt, False)
 
     sectorgroup = get_multilang_codelist("SectorGroup",
         aggregate_by='codeforiati:group-code',
