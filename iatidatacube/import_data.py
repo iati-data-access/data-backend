@@ -132,7 +132,7 @@ def add_row_from_csv(row, codelists, reporting_organisation):
     db.session.add(il)
 
 
-def import_activities(df):
+def import_activities(df, attempt=0):
     unique = df[['iati_identifier', 'title#en']].drop_duplicates(subset=['iati_identifier', 'title#en'])
     known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(IATIActivity.iati_identifier).all()]
     for i, row in unique.iterrows():
@@ -142,7 +142,14 @@ def import_activities(df):
             act.title = row['title#en']
             db.session.add(act)
             known_iati_identifiers.append(row['iati_identifier'])
-    db.session.commit()
+    try:
+        db.session.commit()
+    except sa.exc.IntegrityError as e:
+        if attempt == 3:
+            print("Failed after 3 attempts")
+            raise(e)
+        db.session.rollback()
+        import_activities(df, attempt+1)
 
 
 def get_reporting_org(reporting_orgs, row):
