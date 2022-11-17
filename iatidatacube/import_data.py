@@ -58,7 +58,8 @@ def import_data(filename, known_reporting_organisations):
         except Exception as e:
             print(f"Couldn't add row {i}, exception was {e}")
             db.session.rollback()
-        if i % 1000: db.session.commit()
+        if i % 1000 == 0:
+            db.session.commit()
     db.session.commit()
 
 
@@ -88,7 +89,7 @@ def drop_db():
     db.drop_all()
 
 
-def add_row_from_csv(row, codelists, known_iati_identifiers):
+def add_row_from_csv(row, codelists):
     il = IATILine()
     for key, value in row.items():
         map_keys = {
@@ -114,7 +115,7 @@ def add_row_from_csv(row, codelists, known_iati_identifiers):
                 value), 1)
             if ro not in codelists['reporting_organisation']:
                 print(f"Reporting organisation {ro} not recognised, skipping.")
-                return known_iati_identifiers
+                return
             il.reporting_organisation = ro
         elif _key in ("aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector"):
@@ -131,17 +132,22 @@ def add_row_from_csv(row, codelists, known_iati_identifiers):
             "recipient_country_or_region", "calendar_year",
             "calendar_quarter", "calendar_year_and_quarter"):
             setattr(il, _key, value)
-        elif _key in ("title#en"):
-            if row['iati_identifier'] not in known_iati_identifiers:
-                act = IATIActivity()
-                act.iati_identifier = row['iati_identifier']
-                act.title = row['title#en']
-                db.session.add(act)
-                known_iati_identifiers.append(row['iati_identifier'])
         else:
             setattr(il, _key, value)
     db.session.add(il)
-    return known_iati_identifiers
+
+
+def import_activities(df):
+    unique = df[['iati_identifier', 'title#en']].drop_duplicates(subset=['iati_identifier', 'title#en'])
+    known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(IATIActivity.iati_identifier).all()]
+    for i, row in unique.iterrows():
+        if row["iati_identifier"] not in known_iati_identifiers:
+            act = IATIActivity()
+            act.iati_identifier = row['iati_identifier']
+            act.title = row['title#en']
+            db.session.add(act)
+            known_iati_identifiers.append(row['iati_identifier'])
+    db.session.commit()
 
 
 def import_from_csv(csv_file, codelists):
@@ -158,16 +164,17 @@ def import_from_csv(csv_file, codelists):
     df = df.groupby(headers)
     df = df.agg({'value_usd':'sum','value_eur':'sum','value_local':'sum'})
     df = df.reset_index()
-    #df = df.fillna(no_data)
-    #print(df.head())
-    known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(IATIActivity.iati_identifier).all()]
+
+    import_activities(df)
+
     for i, row in df.iterrows():
         try:
-            known_iati_identifiers = add_row_from_csv(row, codelists, known_iati_identifiers)
+            add_row_from_csv(row, codelists)
         except Exception as e:
             print(f"Couldn't add row {i}, exception was {e}")
             db.session.rollback()
-        if i % 2000: db.session.commit()
+        if i % 1000 == 0:
+            db.session.commit()
     db.session.commit()
 
 
