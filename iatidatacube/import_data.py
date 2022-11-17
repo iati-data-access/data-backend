@@ -189,7 +189,7 @@ def process_data():
         langs=langs)
 
 
-def import_all():
+def import_all(start_at=''):
     langs = ['en']
     codelists = {
         "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
@@ -202,8 +202,12 @@ def import_all():
         "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
     }
     files_to_import = sorted(os.listdir('output/csv/'))
+    if start_at != '':
+        start = False
     for csv_file in files_to_import:
         if not csv_file.endswith('.csv'): continue
+        if (csv_file != start_at) and (start == False):
+            continue
         start = time.time()
         import_from_csv(csv_file, codelists)
         end = time.time()
