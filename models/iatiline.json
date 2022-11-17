@@ -1,0 +1,417 @@
+{
+    "fact_table": "iati_line",
+    "hierarchies": {
+        "sectoral": {
+            "ref": "sectoral",
+            "label": "sectoral",
+            "levels": [
+                "sector_category",
+                "sector"
+            ]
+        },
+        "date": {
+            "ref": "date",
+            "label": "date",
+            "levels": [
+                "year", "quarter"
+            ]
+        }
+    },
+    "dimensions": {
+        "activity": {
+            "attributes": {
+                "iati_identifier": {
+                    "column": "iati_activity.iati_identifier",
+                    "label": "IATI Identifier",
+                    "type": "string"
+                },
+                "title": {
+                    "column": "iati_activity.title",
+                    "label": "Title",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "iati_identifier",
+            "label_attribute": "title",
+            "label": "Activity",
+            "join_column": "iati_identifier"
+        },
+        "reporting_organisation": {
+            "attributes": {
+                "code": {
+                    "column": "reporting_organisation.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "reporting_organisation.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "reporting_organisation.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "reporting_organisation.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "reporting_organisation.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "column": "reporting_organisation.type",
+                    "label": "Type",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Reporting Organisation",
+            "join_column": "reporting_organisation"
+        },
+        "reporting_organisation_type": {
+            "attributes": {
+                "code": {
+                    "column": "organisation_type.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "organisation_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "organisation_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "organisation_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "organisation_type.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name_en",
+            "label": "Reporting Organisation Type",
+            "join_column": "reporting_organisation_type"
+        },
+        "sector_category": {
+            "attributes": {
+                "code": {
+                    "column": "sector_category.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "sector_category.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "sector_category.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "sector_category.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "sector_category.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Sector Category",
+            "join_column": "sector_category"
+        },
+        "transaction_type": {
+            "attributes": {
+                "code": {
+                    "column": "transaction_type.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "transaction_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "transaction_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "transaction_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "transaction_type.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Transaction Type",
+            "join_column": "transaction_type"
+        },
+        "sector": {
+            "attributes": {
+                "code": {
+                    "column": "sector.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "sector.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "sector.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "sector.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "sector.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Sector",
+            "join_column": "sector"
+        },
+        "year": {
+            "attributes": {
+                "year": {
+                    "column": "calendar_year",
+                    "label": "Year",
+                    "type": "string",
+                    "ref": "year"
+                }
+            },
+            "key_attribute": "year",
+            "label_attribute": "year",
+            "label": "Year",
+            "hierarchy": "date"
+        },
+        "quarter": {
+          "attributes": {
+            "quarter": {
+              "column": "calendar_quarter",
+              "label": "Quarter",
+              "type": "string",
+              "ref": "quarter"
+            }
+          },
+          "key_attribute": "quarter",
+          "label_attribute": "quarter",
+          "label": "Quarter",
+          "hierarchy": "date"
+        },
+        "calendar_year_and_quarter": {
+          "attributes": {
+            "calendar_year_and_quarter": {
+              "column": "calendar_year_and_quarter",
+              "label": "Calendar Year and Quarter",
+              "type": "string",
+              "ref": "calendar_year_and_quarter"
+            }
+          },
+          "key_attribute": "calendar_year_and_quarter",
+          "label_attribute": "calendar_year_and_quarter",
+          "label": "Calendar Year and Quarter"
+        },
+        "aid_type": {
+            "attributes": {
+                "code": {
+                    "column": "aid_type.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "aid_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "aid_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "aid_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "aid_type.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Aid Type",
+            "join_column": "aid_type"
+        },
+        "finance_type": {
+            "attributes": {
+                "code": {
+                    "column": "finance_type.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "finance_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "finance_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "finance_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "finance_type.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Finance Type",
+            "join_column": "finance_type"
+        },
+        "flow_type": {
+            "attributes": {
+                "code": {
+                    "column": "flow_type.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "flow_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "flow_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "flow_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "flow_type.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Flow Type",
+            "join_column": "flow_type"
+        },
+        "recipient_country_or_region": {
+            "attributes": {
+                "code": {
+                    "column": "recipient_country_or_region.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "recipient_country_or_region.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "recipient_country_or_region.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "recipient_country_or_region.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "recipient_country_or_region.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Recipient Country or Region",
+            "join_column": "recipient_country_or_region"
+        },
+        "humanitarian": {
+            "attributes": {
+                "code": {
+                    "column": "humanitarian",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name": {
+                    "column": "humanitarian",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name",
+            "label": "Humanitarian"
+        }
+    },
+    "measures": {
+        "value_usd": {
+            "column": "value_usd",
+            "label": "Value",
+            "type": "float"
+        },
+        "value_eur": {
+            "column": "value_eur",
+            "label": "Value",
+            "type": "float"
+        },
+        "total": {
+            "column": "value_usd",
+            "label": "Total amount",
+            "type": "integer"
+        }
+    }
+}

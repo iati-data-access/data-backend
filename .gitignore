@@ -1,0 +1,11 @@
+pyenv
+__iatikitcache__
+__pycache__
+*.csv
+*.xlsx
+output
+.DS_Store
+*.sublime-*
+config.py
+generate_model.py
+model_template.json
