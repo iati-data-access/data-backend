@@ -134,7 +134,9 @@ def add_row_from_csv(row, codelists, reporting_organisation):
 
 def import_activities(df, attempt=0):
     unique = df[['iati_identifier', 'title#en']].drop_duplicates(subset=['iati_identifier', 'title#en'])
-    known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(IATIActivity.iati_identifier).all()]
+    unique_iati_identifiers = [activity['iati_identifier'] for i, activity in unique.iterrows()]
+    known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(
+        IATIActivity.iati_identifier).filter(IATIActivity.iati_identifier.in_(unique_iati_identifiers)).all()]
     for i, row in unique.iterrows():
         if row["iati_identifier"] not in known_iati_identifiers:
             act = IATIActivity()
