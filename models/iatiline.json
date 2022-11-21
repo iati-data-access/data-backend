@@ -74,6 +74,42 @@
             "label": "Reporting Organisation",
             "join_column": "reporting_organisation"
         },
+        "provider_organisation": {
+            "attributes": {
+                "code": {
+                    "column": "provider_organisation",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "type": {
+                    "column": "provider_organisation_type",
+                    "label": "Type",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "name",
+            "label_attribute": "name",
+            "label": "Provider Organisation",
+            "join_column": "provider_organisation"
+        },
+        "receiver_organisation": {
+            "attributes": {
+                "code": {
+                    "column": "receiver_organisation",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "type": {
+                    "column": "receiver_organisation_type",
+                    "label": "Type",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "name",
+            "label_attribute": "name",
+            "label": "Receiver Organisation",
+            "join_column": "receiver_organisation"
+        },
         "reporting_organisation_type": {
             "attributes": {
                 "code": {
