@@ -62,11 +62,6 @@
                     "column": "reporting_organisation.name_pt",
                     "label": "Name",
                     "type": "string"
-                },
-                "type": {
-                    "column": "reporting_organisation.type",
-                    "label": "Type",
-                    "type": "string"
                 }
             },
             "key_attribute": "code",
