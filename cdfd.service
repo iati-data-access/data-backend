@@ -1,0 +1,13 @@
+[Unit]
+Description=CDFD Backend uWSGI instance
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/cdfd/backend
+ExecStart=/usr/bin/uwsgi --ini /var/www/cdfd/backend/cdfd_uwsgi.ini
+
+
+[Install]
+WantedBy=multi-user.target
