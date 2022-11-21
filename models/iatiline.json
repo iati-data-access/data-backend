@@ -76,9 +76,9 @@
         },
         "provider_organisation": {
             "attributes": {
-                "code": {
+                "name": {
                     "column": "provider_organisation",
-                    "label": "Code",
+                    "label": "Name",
                     "type": "string"
                 },
                 "type": {
@@ -94,9 +94,9 @@
         },
         "receiver_organisation": {
             "attributes": {
-                "code": {
+                "name": {
                     "column": "receiver_organisation",
-                    "label": "Code",
+                    "label": "Name",
                     "type": "string"
                 },
                 "type": {
