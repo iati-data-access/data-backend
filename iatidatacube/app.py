@@ -39,7 +39,11 @@ def register_responses(app):
     @app.after_request
     def handle_xlsx(response):
         if request.args.get('format') == 'xlsx':
-            data = response.get_json()['cells']
+            response_json = response.get_json(force=True)
+            if 'cells' in response_json:
+                data = response_json['cells']
+            else:
+                data = response_json['data']
             xlsx_file = xlsx_writer.generate_xlsx(data)
             print("made xlsx file", xlsx_file)
             response = make_response(send_file(xlsx_file,
