@@ -17,7 +17,11 @@ def setup_codelists():
 @with_appcontext
 def drop_all():
     """Drops all table from the database."""
-    drop_db()
+    if click.confirm("Are you sure you would like to drop all data in the database? This action cannot be undone!"):
+        print("Dropping DB.")
+        drop_db()
+    else:
+        print("Aborting.")
 
 
 @click.command()
