@@ -19,7 +19,7 @@ pip install -r requirements.txt
 2. Set up a database:
 
 ```
-psql createdb -d iatidatacube
+psql createdb iatidatacube
 ```
 
 3. Adjust config file if necessary.
