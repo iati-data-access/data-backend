@@ -6,14 +6,6 @@ from iatidatacube.import_codelists import import_codelists
 
 
 @click.command()
-@click.argument('country_code')
-@with_appcontext
-def setup_country(country_code):
-    """Setup a country."""
-    import_country(country_code)
-
-
-@click.command()
 @with_appcontext
 def setup_codelists():
     """Create database and setup codelists."""
