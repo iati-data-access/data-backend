@@ -19,7 +19,6 @@ def create_app(config_object='config'):
 
 def register_commands(app):
     """Register Click commands."""
-    app.cli.add_command(commands.setup_country)
     app.cli.add_command(commands.setup_codelists)
     app.cli.add_command(commands.drop_all)
     app.cli.add_command(commands.update)
@@ -45,7 +44,6 @@ def register_responses(app):
             else:
                 data = response_json['data']
             xlsx_file = xlsx_writer.generate_xlsx(data)
-            print("made xlsx file", xlsx_file)
             response = make_response(send_file(xlsx_file,
                 mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 as_attachment=True,
