@@ -34,6 +34,8 @@ cp config.py.tmpl config.py
 * cdfd_uwsgi.ini -> uwsgi
 * cdfd.service -> systemd service
 
+5. Setup [certbot](https://certbot.eff.org/instructions)
+
 ## Importing data
 
 This is still a little bit of a work in progress. CDFD Backend is currently using CSV versions of the same files which are [publicly available](https://countrydata.iatistandard.org/). The advantage of these files, compared with the XLSX files, is that they are much faster to read and parse, and that they contain codes separately from the labels, which is more convenient for storing in the database.
