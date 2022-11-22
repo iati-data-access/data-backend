@@ -2,7 +2,7 @@
 
 This is the back-end to IATI's Country Development Finance Data tool.
 
-It provides a very simple framework to access the data, based on a modified version of the Babbage library that previously powered OpenSpending.
+It provides a very simple framework to access the data, based on [a modified version of the Babbage library](https://github.com/markbrough/babbage/tree/dev) that previously powered [OpenSpending](https://github.com/openspending).
 
 It also provides a set of import scripts, based on parsing data generated from the original CDFD libraries.
 
