@@ -28,6 +28,7 @@ def register_commands(app):
 def register_blueprints(app):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     models_directory = 'models/'
+    # FIXME later change this to CachingJSONCubeManager
     manager = JSONCubeManager(engine, models_directory)
     blueprint = configure_api(app, manager)
     app.register_blueprint(blueprint, url_prefix='/api/babbage')
@@ -40,7 +41,7 @@ def register_responses(app):
         if request.args.get('format') == 'xlsx':
             response_json = response.get_json(force=True)
             if 'cells' in response_json:
-                data = response_json['cells']
+                data = list(xlsx_writer.serialise(request.args, response_json['cells']))
             else:
                 data = response_json['data']
             xlsx_file = xlsx_writer.generate_xlsx(data)
