@@ -6,8 +6,11 @@ from iatidatacube.models import *
 from iatidatacube.extensions import db
 import iatikit
 import iatiflattener
+from iatiflattener import group_data
 import pandas as pd
 import time
+import csv
+import datetime
 
 
 def get_groups_or_none(possible_match, index):
@@ -89,6 +92,27 @@ def drop_db():
     db.drop_all()
 
 
+def add_or_update_dataset(csv_file, status='processing'):
+    dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
+    dataset_id = f"{dataset_type}-{dataset_country}"
+    dataset = Dataset.query.filter_by(
+        id=dataset_id).first()
+    if dataset is None:
+        dataset = Dataset()
+        dataset.id = dataset_id
+        dataset.dataset_type = dataset_type
+        dataset.country = dataset_country
+        dataset.created_at = datetime.datetime.utcnow()
+    if status == 'processing':
+        dataset.processing_at = datetime.datetime.now()
+        dataset.status = 1
+    elif status == 'complete':
+        dataset.updated_at = datetime.datetime.now()
+        dataset.status = 2
+    db.session.add(dataset)
+    db.session.commit()
+
+
 def delete_dataset(csv_file):
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
     if dataset_type == 'budget':
@@ -113,8 +137,14 @@ def add_row_from_csv(row, codelists, reporting_organisation):
         map_keys = {
             'reporting_org_type': 'reporting_organisation_type',
             'provider_org#en': 'provider_organisation',
+            'provider_org#fr': 'provider_organisation_fr',
+            'provider_org#es': 'provider_organisation_es',
+            'provider_org#pt': 'provider_organisation_pt',
             'provider_org_type': 'provider_organisation_type',
             'receiver_org#en': 'receiver_organisation',
+            'receiver_org#fr': 'receiver_organisation_fr',
+            'receiver_org#es': 'receiver_organisation_es',
+            'receiver_org#pt': 'receiver_organisation_pt',
             'receiver_org_type': 'receiver_organisation_type',
             'country_code': 'recipient_country_or_region',
             'sector_code': 'sector',
@@ -150,26 +180,47 @@ def add_row_from_csv(row, codelists, reporting_organisation):
     db.session.add(il)
 
 
-def import_activities(df, attempt=0):
-    unique = df[['iati_identifier', 'title#en']].drop_duplicates(subset=['iati_identifier', 'title#en'])
-    unique_iati_identifiers = [activity['iati_identifier'] for i, activity in unique.iterrows()]
-    known_iati_identifiers = [row.iati_identifier for row in IATIActivity.query.with_entities(
-        IATIActivity.iati_identifier).filter(IATIActivity.iati_identifier.in_(unique_iati_identifiers)).all()]
-    for i, row in unique.iterrows():
-        if row["iati_identifier"] not in known_iati_identifiers:
-            act = IATIActivity()
-            act.iati_identifier = row['iati_identifier']
-            act.title = row['title#en']
-            db.session.add(act)
-            known_iati_identifiers.append(row['iati_identifier'])
-    try:
+def import_activities(csv_file, codelists):
+    reporting_organisation_ref = None
+    iati_identifiers = []
+    csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
+    with open(csv_file_path, 'r') as _csv_file:
+        csvreader = csv.DictReader(_csv_file)
+        for activity_row in csvreader:
+            reporting_organisation_ref = activity_row['reporting_org_ref']
+            iati_identifiers.append(activity_row['iati_identifier'])
+            add_or_update_activity(activity_row)
         db.session.commit()
-    except sa.exc.IntegrityError as e:
-        if attempt == 3:
-            print("Failed after 3 attempts")
-            raise(e)
-        db.session.rollback()
-        import_activities(df, attempt+1)
+    # Handle deleted IATI identifiers
+
+
+def iso_date(value):
+    return datetime.datetime.strptime(value, '%Y-%m-%d').date()
+
+
+def add_or_update_activity(activity_row):
+    activity = IATIActivity.query.filter(
+        IATIActivity.iati_identifier==activity_row['iati_identifier']).first()
+    if activity is None:
+        activity = IATIActivity()
+        activity.iati_identifier = activity_row['iati_identifier']
+    activity.title = activity_row['title#en']
+    activity.title_fr = activity_row['title#fr']
+    activity.title_es = activity_row['title#es']
+    activity.title_pt = activity_row['title#pt']
+    activity.description = activity_row['description#en']
+    activity.description_fr = activity_row['description#fr']
+    activity.description_es = activity_row['description#es']
+    activity.description_pt = activity_row['description#pt']
+    activity.glide = activity_row['GLIDE']
+    activity.hrp = activity_row['HRP']
+    activity.location = activity_row['location']
+    try:
+        activity.start_date = iso_date(activity_row['start_date'])
+        activity.end_date = iso_date(activity_row['end_date'])
+    except ValueError:
+        pass
+    db.session.add(activity)
 
 
 def get_reporting_org(reporting_orgs, row):
@@ -181,11 +232,11 @@ def get_reporting_org(reporting_orgs, row):
     return reporting_orgs, reporting_orgs.get(ro_row)
 
 
-def import_from_csv(csv_file, codelists):
+def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
+    add_or_update_dataset(csv_file, 'processing')
     print(f"Deleting existing dataset for {csv_file}")
     delete_dataset(csv_file)
     print(f"Loading {csv_file}")
-    langs = ['en']
 
     start = time.time()
     CSV_HEADERS = iatiflattener.lib.variables.headers(langs)
@@ -201,10 +252,6 @@ def import_from_csv(csv_file, codelists):
     df = df.reset_index()
     end = time.time()
     print(f"Reading data took {end-start}s")
-    start = time.time()
-    import_activities(df)
-    end = time.time()
-    print(f"Loading activities took {end-start}s")
 
     start = time.time()
     reporting_orgs = {}
@@ -223,21 +270,24 @@ def import_from_csv(csv_file, codelists):
     db.session.commit()
     end = time.time()
     print(f"Committing rows took {end-start}s")
+    add_or_update_dataset(csv_file, 'complete')
 
 
 def fetch_data():
     iatikit.download.data()
 
 
-def process_data():
-    langs = ['en']
+def process_data(langs=['en', 'fr', 'es', 'pt']):
     os.makedirs('output/csv/', exist_ok=True)
     iatiflattener.FlattenIATIData(refresh_rates=True,
         langs=langs)
 
 
-def import_all(start_at='', end_at=''):
-    langs = ['en']
+def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
+    group_data.GroupFlatIATIData(langs=langs)
+
+
+def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     codelists = {
         "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
         "aid_type": [item.code for item in AidType.query.all()],
@@ -248,6 +298,11 @@ def import_all(start_at='', end_at=''):
         "sector": [item.code for item in Sector.query.all()],
         "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
     }
+    activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
+    for activity_csv_file in activity_files_to_import:
+        if not activity_csv_file.endswith('.csv'): continue
+        import_activities(activity_csv_file, codelists)
+
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
         start = False
