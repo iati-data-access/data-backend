@@ -126,10 +126,33 @@ class Sector(db.Model):
         nullable=False)
 
 
+class Dataset(db.Model):
+    __tablename__="dataset"
+    id = sa.Column(sa.UnicodeText, primary_key=True)
+    dataset_type = sa.Column(sa.UnicodeText, nullable=False)
+    country = sa.Column(sa.UnicodeText, nullable=False)
+    created_at = sa.Column(sa.DateTime, nullable=False, index=True)
+    processing_at = sa.Column(sa.DateTime, nullable=False, index=True)
+    updated_at = sa.Column(sa.DateTime, nullable=True, index=True)
+    status = sa.Column(sa.Integer, nullable=False, index=True)
+
+
 class IATIActivity(db.Model):
     __tablename__="iati_activity"
     iati_identifier = sa.Column(sa.UnicodeText, primary_key=True)
     title = sa.Column(sa.UnicodeText, nullable=False)
+    title_fr = sa.Column(sa.UnicodeText, nullable=False)
+    title_pt = sa.Column(sa.UnicodeText, nullable=False)
+    title_es = sa.Column(sa.UnicodeText, nullable=False)
+    description = sa.Column(sa.UnicodeText, nullable=False)
+    description_fr = sa.Column(sa.UnicodeText, nullable=False)
+    description_pt = sa.Column(sa.UnicodeText, nullable=False)
+    description_es = sa.Column(sa.UnicodeText, nullable=False)
+    start_date = sa.Column(sa.Date, nullable=True, index=True)
+    end_date = sa.Column(sa.Date, nullable=True, index=True)
+    glide = sa.Column(sa.UnicodeText, nullable=True, index=True)
+    hrp = sa.Column(sa.UnicodeText, nullable=True, index=True)
+    location = sa.Column(sa.UnicodeText, nullable=True, index=True)
 
 
 class IATILine(db.Model):
@@ -156,9 +179,21 @@ class IATILine(db.Model):
         nullable=True, index=True)
     provider_organisation = sa.Column(sa.UnicodeText,
         nullable=False, index=False)
+    provider_organisation_fr = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
+    provider_organisation_pt = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
+    provider_organisation_es = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
     provider_organisation_type = sa.Column(sa.UnicodeText,
         nullable=True, index=False)
     receiver_organisation = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
+    receiver_organisation_fr = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
+    receiver_organisation_pt = sa.Column(sa.UnicodeText,
+        nullable=False, index=False)
+    receiver_organisation_es = sa.Column(sa.UnicodeText,
         nullable=False, index=False)
     receiver_organisation_type = sa.Column(sa.UnicodeText,
         nullable=True, index=False)
