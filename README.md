@@ -36,6 +36,14 @@ cp config.py.tmpl config.py
 
 5. Setup [certbot](https://certbot.eff.org/instructions)
 
+## When the database model changes
+
+1. Run the database migration:
+
+```
+flask db upgrade
+```
+
 ## Importing data
 
 This is still a little bit of a work in progress. CDFD Backend is currently using CSV versions of the same files which are [publicly available](https://countrydata.iatistandard.org/). The advantage of these files, compared with the XLSX files, is that they are much faster to read and parse, and that they contain codes separately from the labels, which is more convenient for storing in the database.
@@ -77,7 +85,13 @@ And to load all country budget files:
 flask update -s budget-AD.csv -e budget-ZW.csv
 ```
 
-5. If you want to delete everything from the database and start again, you can run:
+5. You should then run the following script to convert the CSV files into grouped XLSX files:
+
+```
+flask group
+```
+
+6. If you want to delete everything from the database and start again, you can run:
 
 ```
 flask drop-db
