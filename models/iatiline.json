@@ -25,14 +25,74 @@
                     "label": "IATI Identifier",
                     "type": "string"
                 },
-                "title": {
+                "title_en": {
                     "column": "iati_activity.title",
                     "label": "Title",
+                    "type": "string"
+                },
+                "title_fr": {
+                    "column": "iati_activity.title_fr",
+                    "label": "Title",
+                    "type": "string"
+                },
+                "title_es": {
+                    "column": "iati_activity.title_es",
+                    "label": "Title",
+                    "type": "string"
+                },
+                "title_pt": {
+                    "column": "iati_activity.title_pt",
+                    "label": "Title",
+                    "type": "string"
+                },
+                "description_en": {
+                    "column": "iati_activity.description",
+                    "label": "Description",
+                    "type": "string"
+                },
+                "description_fr": {
+                    "column": "iati_activity.description_fr",
+                    "label": "Description",
+                    "type": "string"
+                },
+                "description_es": {
+                    "column": "iati_activity.description_es",
+                    "label": "Description",
+                    "type": "string"
+                },
+                "description_pt": {
+                    "column": "iati_activity.description_pt",
+                    "label": "Description",
+                    "type": "string"
+                },
+                "start_date": {
+                    "column": "iati_activity.start_date",
+                    "label": "Start Date",
+                    "type": "date"
+                },
+                "end_date": {
+                    "column": "iati_activity.end_date",
+                    "label": "End Date",
+                    "type": "date"
+                },
+                "location": {
+                    "column": "iati_activity.location",
+                    "label": "Location",
+                    "type": "string"
+                },
+                "hrp": {
+                    "column": "iati_activity.hrp",
+                    "label": "HRP",
+                    "type": "string"
+                },
+                "glide": {
+                    "column": "iati_activity.glide",
+                    "label": "GLIDE",
                     "type": "string"
                 }
             },
             "key_attribute": "iati_identifier",
-            "label_attribute": "title",
+            "label_attribute": "title_en",
             "label": "Activity",
             "join_column": "iati_identifier"
         },
@@ -207,6 +267,21 @@
                     "column": "provider_organisation",
                     "label": "Name",
                     "type": "string"
+                },
+                "name_fr": {
+                    "column": "provider_organisation_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "provider_organisation_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "provider_organisation_pt",
+                    "label": "Name",
+                    "type": "string"
                 }
             },
             "key_attribute": "name_en",
@@ -215,16 +290,16 @@
             "join_column": "provider_organisation"
         },
         "provider_organisation_type": {
-            "atributes": {
+            "attributes": {
                 "code": {
                     "column": "provider_organisation_type",
-                    "label": "Type",
+                    "label": "Code",
                     "type": "string"
                 }
             },
             "key_attribute": "code",
             "label_attribute": "code",
-            "label": "code"
+            "label": "Provider Organisation Type"
         },
         "receiver_organisation": {
             "attributes": {
@@ -233,9 +308,19 @@
                     "label": "Name",
                     "type": "string"
                 },
-                "type": {
-                    "column": "receiver_organisation_type",
-                    "label": "Type",
+                "name_fr": {
+                    "column": "receiver_organisation_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "receiver_organisation_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "receiver_organisation_pt",
+                    "label": "Name",
                     "type": "string"
                 }
             },
@@ -245,16 +330,16 @@
             "join_column": "receiver_organisation"
         },
         "receiver_organisation_type": {
-            "atributes": {
+            "attributes": {
                 "code": {
                     "column": "receiver_organisation_type",
-                    "label": "Type",
+                    "label": "Code",
                     "type": "string"
                 }
             },
             "key_attribute": "code",
             "label_attribute": "code",
-            "label": "code"
+            "label": "Receiver Organisation Type"
         },
         "transaction_type": {
             "attributes": {
