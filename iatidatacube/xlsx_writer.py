@@ -14,8 +14,7 @@ def generate_xlsx(data):
 
 
 def serialise(args, data):
-    #FIXME support more languages later
-    lang = 'en'
+    lang = args.get('lang', 'en')
     keys = data[0].keys()
     drilldowns = args.get('drilldown').split('|')
     aggregates = args.get('aggregates').split('|')
