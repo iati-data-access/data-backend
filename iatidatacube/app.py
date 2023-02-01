@@ -12,6 +12,7 @@ def create_app(config_object='config'):
     app.config.from_pyfile('../config.py')
     CORS(app)
     extensions.db.init_app(app)
+    extensions.migrate.init_app(app, extensions.db)
     register_commands(app)
     register_blueprints(app)
     register_responses(app)
