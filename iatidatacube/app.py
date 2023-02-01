@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_file, make_response
+from flask import Flask, request, Response, send_file, make_response, jsonify
 from sqlalchemy import create_engine
 from babbage.manager import JSONCubeManager
 from babbage.api import configure_api
@@ -25,6 +25,7 @@ def register_commands(app):
     app.cli.add_command(commands.update)
     app.cli.add_command(commands.download)
     app.cli.add_command(commands.process)
+    app.cli.add_command(commands.group)
 
 def register_blueprints(app):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -45,6 +46,8 @@ def register_responses(app):
                 data = list(xlsx_writer.serialise(request.args, response_json['cells']))
             else:
                 data = response_json['data']
+            if len(data) >= 1048576:
+                return make_response(jsonify(msg="Your requested file contains too many rows to create an Excel file. Narrow your search filters and try again."), 400)
             xlsx_file = xlsx_writer.generate_xlsx(data)
             response = make_response(send_file(xlsx_file,
                 mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
