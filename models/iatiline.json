@@ -207,17 +207,24 @@
                     "column": "provider_organisation",
                     "label": "Name",
                     "type": "string"
-                },
-                "type": {
-                    "column": "provider_organisation_type",
-                    "label": "Type",
-                    "type": "string"
                 }
             },
             "key_attribute": "name_en",
             "label_attribute": "name_en",
             "label": "Provider Organisation",
             "join_column": "provider_organisation"
+        },
+        "provider_organisation_type": {
+            "atributes": {
+                "code": {
+                    "column": "provider_organisation_type",
+                    "label": "Type",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "code",
+            "label": "code"
         },
         "receiver_organisation": {
             "attributes": {
@@ -236,6 +243,18 @@
             "label_attribute": "name_en",
             "label": "Receiver Organisation",
             "join_column": "receiver_organisation"
+        },
+        "receiver_organisation_type": {
+            "atributes": {
+                "code": {
+                    "column": "receiver_organisation_type",
+                    "label": "Type",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "code",
+            "label": "code"
         },
         "transaction_type": {
             "attributes": {
