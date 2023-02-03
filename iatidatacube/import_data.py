@@ -243,7 +243,10 @@ def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
     _DTYPES = iatiflattener.lib.variables.dtypes(langs)
     headers = iatiflattener.lib.variables.group_by_headers_with_langs(langs)
     CSV_HEADER_DTYPES = dict(map(lambda csv_header: (csv_header[1], _DTYPES[csv_header[0]]), enumerate(CSV_HEADERS)))
+    # Don't read 'NA' as a NA value (it is Namibia)
     df = pd.read_csv(os.path.join('output', 'csv', csv_file), dtype=CSV_HEADER_DTYPES)
+    if 'NA' in csv_file:
+        df.country_code = df.country_code.fillna('NA')
     all_relevant_headers = headers + ['value_usd', 'value_eur', 'value_local']
     df = df[all_relevant_headers]
     df = df.fillna('')
