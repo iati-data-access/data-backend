@@ -26,6 +26,7 @@ def register_commands(app):
     app.cli.add_command(commands.download)
     app.cli.add_command(commands.process)
     app.cli.add_command(commands.group)
+    app.cli.add_command(commands.update_activities_only)
 
 def register_blueprints(app):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])

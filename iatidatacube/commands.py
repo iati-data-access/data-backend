@@ -1,7 +1,7 @@
 """Click commands."""
 import click
 from flask.cli import with_appcontext
-from iatidatacube.import_data import import_country, setup_db, drop_db, import_all, fetch_data, process_data, group_all
+from iatidatacube.import_data import import_country, setup_db, drop_db, import_all, fetch_data, process_data, group_all, import_all_activities
 from iatidatacube.import_codelists import import_codelists
 
 
@@ -54,3 +54,12 @@ def update(start_at, end_at):
 def group(start_at, end_at):
     """Groups processed data into XLSX files for publication."""
     group_all(start_at, end_at)
+
+
+@click.command()
+@click.option('-s', 'start_at', default='')
+@click.option('-e', 'end_at', default='')
+@with_appcontext
+def update_activities_only(start_at, end_at):
+    """Updates activity data only."""
+    import_all_activities(start_at, end_at)
