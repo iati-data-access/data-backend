@@ -180,7 +180,23 @@ def add_row_from_csv(row, codelists, reporting_organisation):
     db.session.add(il)
 
 
-def import_activities(csv_file, codelists):
+def import_all_activities(start_at='', end_at=''):
+    files_to_import = sorted(os.listdir('output/csv/activities/'))
+    if start_at != '':
+        start = False
+    else: start = True
+    for csv_file in files_to_import:
+        if not csv_file.endswith('.csv'): continue
+        if (csv_file != start_at) and (start == False):
+            continue
+        start = time.time()
+        import_activities(csv_file)
+        end = time.time()
+        print(f"Processed {csv_file} in {end-start}s")
+        if (csv_file == end_at): break
+
+
+def import_activities(csv_file):
     reporting_organisation_ref = None
     iati_identifiers = []
     csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
@@ -304,7 +320,7 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
     for activity_csv_file in activity_files_to_import:
         if not activity_csv_file.endswith('.csv'): continue
-        import_activities(activity_csv_file, codelists)
+        import_activities(activity_csv_file)
 
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
