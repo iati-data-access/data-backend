@@ -317,10 +317,14 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
         "sector": [item.code for item in Sector.query.all()],
         "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
     }
+    print("Loading and updating all activities...")
+    start = time.time()
     activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
     for activity_csv_file in activity_files_to_import:
         if not activity_csv_file.endswith('.csv'): continue
         import_activities(activity_csv_file)
+    end = time.time()
+    print(f"Loaded all activities in {end-start}s")
 
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
