@@ -1,0 +1,52 @@
+{
+    "fact_table": "dataset",
+    "hierarchies": {
+    },
+    "dimensions": {
+        "dataset": {
+            "attributes": {
+                "id": {
+                    "column": "id",
+                    "label": "id",
+                    "type": "string"
+                },
+                "dataset_type": {
+                    "column": "dataset_type",
+                    "label": "dataset_type",
+                    "type": "string"
+                },
+                "country": {
+                    "column": "country",
+                    "label": "country",
+                    "type": "string"
+                },
+                "created_at": {
+                    "column": "created_at",
+                    "label": "created_at",
+                    "type": "date"
+                },
+                "processing_at": {
+                    "column": "processing_at",
+                    "label": "processing_at",
+                    "type": "date"
+                },
+                "updated_at": {
+                    "column": "updated_at",
+                    "label": "updated_at",
+                    "type": "date"
+                }
+            },
+            "key_attribute": "id",
+            "label_attribute": "id",
+            "label": "Dataset"
+        }
+    },
+    "measures": {
+        "status": {
+            "column": "status",
+            "label": "Status",
+            "type": "integer"
+        }
+    },
+    "aggregates": ["count"]
+}
