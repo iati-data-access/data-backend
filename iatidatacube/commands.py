@@ -44,6 +44,7 @@ def process():
 @with_appcontext
 def update(start_at, end_at):
     """Updates all processed data."""
+    import_codelists()
     import_all(start_at, end_at)
 
 
