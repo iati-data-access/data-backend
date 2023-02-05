@@ -152,7 +152,7 @@ class IATIActivity(db.Model):
     end_date = sa.Column(sa.Date, nullable=True, index=True)
     glide = sa.Column(sa.UnicodeText, nullable=True, index=True)
     hrp = sa.Column(sa.UnicodeText, nullable=True, index=True)
-    location = sa.Column(sa.UnicodeText, nullable=True, index=True)
+    location = sa.Column(sa.UnicodeText, nullable=True)
 
 
 class IATILine(db.Model):
