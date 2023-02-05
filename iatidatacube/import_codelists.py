@@ -30,7 +30,11 @@ def write_codelist_values(codelist_name, codelist, with_no_data=True):
             'name_pt': translations.get('pt').get('no-data')
         }
     for code, names in codelist.items():
-        cl = eval(f"{codelist_name}()")
+        # Check if this code already exists
+        cl = eval(f"{codelist_name}").query.filter_by(code=code).first()
+        if cl is None:
+            cl = eval(f"{codelist_name}()")
+
         cl.code = code
         for name_key, name_value in names.items():
             setattr(cl, name_key, name_value)
