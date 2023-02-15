@@ -1,6 +1,7 @@
 from normality import slugify
 import re
 import os
+import shutil
 from iatidatacube.xlsx_to_csv import get_data
 from iatidatacube.models import *
 from iatidatacube.extensions import db
@@ -304,6 +305,12 @@ def process_data(langs=['en', 'fr', 'es', 'pt']):
 
 def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     group_data.GroupFlatIATIData(langs=langs)
+    os.makedirs('output/web/', exist_ok=True)
+    shutil.rmtree('output/web/')
+    os.makedirs('output/web/xlsx/', exist_ok=True)
+    os.makedirs('output/web/csv/', exist_ok=True)
+    shutil.copytree('output/xlsx/', 'output/web/xlsx/', dirs_exist_ok=True)
+    shutil.copytree('output/csv/', 'output/web/csv/', dirs_exist_ok=True)
 
 
 def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
