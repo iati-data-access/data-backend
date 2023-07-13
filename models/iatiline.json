@@ -96,6 +96,39 @@
             "label": "Activity",
             "join_column": "iati_identifier"
         },
+        "reporting_organisation_group": {
+            "attributes": {
+                "code": {
+                    "column": "reporting_organisation_group.code",
+                    "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "reporting_organisation_group.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "reporting_organisation_group.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "reporting_organisation_group.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "reporting_organisation_group.name_pt",
+                    "label": "Name",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "code",
+            "label_attribute": "name_en",
+            "label": "Reporting Organisation Group",
+            "join_column": "reporting_organisation_group"
+        },
         "reporting_organisation": {
             "attributes": {
                 "code": {
@@ -292,14 +325,35 @@
         "provider_organisation_type": {
             "attributes": {
                 "code": {
-                    "column": "provider_organisation_type",
+                    "column": "provider_organisation_type.code",
                     "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "provider_organisation_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "provider_organisation_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "provider_organisation_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "provider_organisation_type.name_pt",
+                    "label": "Name",
                     "type": "string"
                 }
             },
             "key_attribute": "code",
-            "label_attribute": "code",
-            "label": "Provider Organisation Type"
+            "label_attribute": "name_en",
+            "label": "Provider Organisation Type",
+            "join_column": "provider_organisation_type"
         },
         "receiver_organisation": {
             "attributes": {
@@ -332,14 +386,35 @@
         "receiver_organisation_type": {
             "attributes": {
                 "code": {
-                    "column": "receiver_organisation_type",
+                    "column": "receiver_organisation_type.code",
                     "label": "Code",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "receiver_organisation_type.name_en",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "receiver_organisation_type.name_fr",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "receiver_organisation_type.name_es",
+                    "label": "Name",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "receiver_organisation_type.name_pt",
+                    "label": "Name",
                     "type": "string"
                 }
             },
             "key_attribute": "code",
-            "label_attribute": "code",
-            "label": "Receiver Organisation Type"
+            "label_attribute": "name_en",
+            "label": "Receiver Organisation Type",
+            "join_column": "receiver_organisation_type"
         },
         "transaction_type": {
             "attributes": {

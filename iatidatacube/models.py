@@ -35,6 +35,32 @@ class OrganisationType(db.Model):
         nullable=False)
 
 
+class ProviderOrganisationType(db.Model):
+    __tablename__= "provider_organisation_type"
+    code = sa.Column(sa.UnicodeText, primary_key=True)
+    name_en = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_fr = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_es = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_pt = sa.Column(sa.UnicodeText,
+        nullable=False)
+
+
+class ReceiverOrganisationType(db.Model):
+    __tablename__= "receiver_organisation_type"
+    code = sa.Column(sa.UnicodeText, primary_key=True)
+    name_en = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_fr = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_es = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_pt = sa.Column(sa.UnicodeText,
+        nullable=False)
+
+
 class AidType(db.Model):
     __tablename__= "aid_type"
     code = sa.Column(sa.UnicodeText, primary_key=True)
@@ -126,6 +152,19 @@ class Sector(db.Model):
         nullable=False)
 
 
+class ReportingOrganisationGroup(db.Model):
+    __tablename__= "reporting_organisation_group"
+    code = sa.Column(sa.UnicodeText, primary_key=True)
+    name_en = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_fr = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_es = sa.Column(sa.UnicodeText,
+        nullable=False)
+    name_pt = sa.Column(sa.UnicodeText,
+        nullable=False)
+
+
 class Dataset(db.Model):
     __tablename__="dataset"
     id = sa.Column(sa.UnicodeText, primary_key=True)
@@ -153,6 +192,7 @@ class IATIActivity(db.Model):
     glide = sa.Column(sa.UnicodeText, nullable=True, index=True)
     hrp = sa.Column(sa.UnicodeText, nullable=True, index=True)
     location = sa.Column(sa.UnicodeText, nullable=True)
+    _hash = sa.Column(sa.UnicodeText, nullable=True, index=True)
 
 
 class IATILine(db.Model):
@@ -160,6 +200,10 @@ class IATILine(db.Model):
     id = sa.Column(sa.Integer, primary_key=True)
     iati_identifier = sa.Column(sa.UnicodeText,
         act_ForeignKey("iati_activity.iati_identifier"))
+    reporting_organisation_group = sa.Column(
+        sa.UnicodeText,
+        act_ForeignKey("reporting_organisation_group.code"),
+        nullable=False, index=True)
     reporting_organisation = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("reporting_organisation.code"),
@@ -185,8 +229,10 @@ class IATILine(db.Model):
         nullable=False, index=False)
     provider_organisation_es = sa.Column(sa.UnicodeText,
         nullable=False, index=False)
-    provider_organisation_type = sa.Column(sa.UnicodeText,
-        nullable=True, index=False)
+    provider_organisation_type = sa.Column(
+        sa.UnicodeText,
+        act_ForeignKey("provider_organisation_type.code"),
+        nullable=True, index=True)
     receiver_organisation = sa.Column(sa.UnicodeText,
         nullable=False, index=False)
     receiver_organisation_fr = sa.Column(sa.UnicodeText,
@@ -195,8 +241,10 @@ class IATILine(db.Model):
         nullable=False, index=False)
     receiver_organisation_es = sa.Column(sa.UnicodeText,
         nullable=False, index=False)
-    receiver_organisation_type = sa.Column(sa.UnicodeText,
-        nullable=True, index=False)
+    receiver_organisation_type = sa.Column(
+        sa.UnicodeText,
+        act_ForeignKey("receiver_organisation_type.code"),
+        nullable=True, index=True)
     transaction_type = sa.Column(sa.UnicodeText,
         act_ForeignKey("transaction_type.code"),
         nullable=True, index=True)
