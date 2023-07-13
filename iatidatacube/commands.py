@@ -9,7 +9,6 @@ from iatidatacube.import_codelists import import_codelists
 @with_appcontext
 def setup_codelists():
     """Create database and setup codelists."""
-    setup_db()
     import_codelists()
 
 
