@@ -136,6 +136,7 @@ def add_row_from_csv(row, codelists, reporting_organisation):
     il = IATILine()
     for key, value in row.items():
         map_keys = {
+            'reporting_org_group': 'reporting_organisation_group',
             'reporting_org_type': 'reporting_organisation_type',
             'provider_org#en': 'provider_organisation',
             'provider_org#fr': 'provider_organisation_fr',
@@ -162,15 +163,16 @@ def add_row_from_csv(row, codelists, reporting_organisation):
         elif _key in ("reporting_org#en"):
             il.reporting_organisation = reporting_organisation
         elif _key in ("aid_type", "finance_type", "flow_type",
-            "transaction_type", "sector_category", "sector"):
+            "transaction_type", "sector_category", "sector",
+            "reporting_organisation_type",
+            "provider_organisation_type",
+            "receiver_organisation_type"):
             if value not in codelists[_key]:
                 value = None
             setattr(il, _key, value)
-        elif _key in ("reporting_organisation_type",
+        elif _key in (
             "provider_organisation",
-            "provider_organisation_type",
             "receiver_organisation",
-            "receiver_organisation_type",
             "aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector",
             "recipient_country_or_region", "calendar_year",
@@ -232,6 +234,7 @@ def add_or_update_activity(activity_row):
     activity.glide = activity_row['GLIDE']
     activity.hrp = activity_row['HRP']
     activity.location = activity_row['location']
+    activity._hash = activity_row['hash']
     try:
         activity.start_date = iso_date(activity_row['start_date'])
         activity.end_date = iso_date(activity_row['end_date'])
@@ -315,7 +318,11 @@ def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
 
 def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     codelists = {
+        "reporting_organisation_group": [item.code for item in ReportingOrganisationGroup.query.all()],
         "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
+        "reporting_organisation_type": [item.code for item in OrganisationType.query.all()],
+        "provider_organisation_type": [item.code for item in OrganisationType.query.all()],
+        "receiver_organisation_type": [item.code for item in OrganisationType.query.all()],
         "aid_type": [item.code for item in AidType.query.all()],
         "finance_type": [item.code for item in FinanceType.query.all()],
         "flow_type": [item.code for item in FlowType.query.all()],
