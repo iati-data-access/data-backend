@@ -44,6 +44,9 @@ def write_codelist_values(codelist_name, codelist, with_no_data=True):
 def import_codelist(codelist_name):
     codelist = get_multilang_codelist(codelist_name)
     write_codelist_values(codelist_name, codelist, True)
+    if codelist_name=='OrganisationType':
+        write_codelist_values('ProviderOrganisationType', codelist, True)
+        write_codelist_values('ReceiverOrganisationType', codelist, True)
     db.session.commit()
 
 
@@ -70,5 +73,10 @@ def import_codelists():
         aggregate_by='codeforiati:group-code',
         aggregate_name='codeforiati:group-name')
     write_codelist_values('SectorCategory', sectorgroup)
+
+    reporting_organisation_group =  get_multilang_codelist("ReportingOrganisationGroup",
+        aggregate_by='codeforiati:group-code',
+        aggregate_name='codeforiati:group-name')
+    write_codelist_values('ReportingOrganisationGroup', reporting_organisation_group)
 
     db.session.commit()
