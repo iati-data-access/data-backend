@@ -419,7 +419,7 @@
         "transaction_type": {
             "attributes": {
                 "code": {
-                    "column": "iati_line.transaction_type",
+                    "column": "transaction_type.code",
                     "label": "Code",
                     "type": "string"
                 },
