@@ -1,7 +1,7 @@
 # Copied from a working server. Ideally these would be generated from pip-compile
 alembic==1.9.2
 attrs==22.1.0
-git+https://github.com/markbrough/babbage@f4652a34b7aed6e8d195cd410b7344ce184fce4d#egg=babbage
+git+https://github.com/markbrough/babbage@da99452e5694d1ce87e0a887f898e694f633bd24#egg=babbage
 banal==1.0.6
 certifi==2022.9.24
 chardet==5.0.0
