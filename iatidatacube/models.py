@@ -179,10 +179,10 @@ class Dataset(db.Model):
 class IATIActivity(db.Model):
     __tablename__="iati_activity"
     iati_identifier = sa.Column(sa.UnicodeText, primary_key=True)
-    title = sa.Column(sa.UnicodeText, nullable=False)
-    title_fr = sa.Column(sa.UnicodeText, nullable=False)
-    title_pt = sa.Column(sa.UnicodeText, nullable=False)
-    title_es = sa.Column(sa.UnicodeText, nullable=False)
+    title = sa.Column(sa.UnicodeText, nullable=False, index=True)
+    title_fr = sa.Column(sa.UnicodeText, nullable=False, index=True)
+    title_pt = sa.Column(sa.UnicodeText, nullable=False, index=True)
+    title_es = sa.Column(sa.UnicodeText, nullable=False, index=True)
     description = sa.Column(sa.UnicodeText, nullable=False)
     description_fr = sa.Column(sa.UnicodeText, nullable=False)
     description_pt = sa.Column(sa.UnicodeText, nullable=False)
@@ -222,25 +222,25 @@ class IATILine(db.Model):
         act_ForeignKey("flow_type.code"),
         nullable=True, index=True)
     provider_organisation = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     provider_organisation_fr = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     provider_organisation_pt = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     provider_organisation_es = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     provider_organisation_type = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("provider_organisation_type.code"),
         nullable=True, index=True)
     receiver_organisation = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     receiver_organisation_fr = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     receiver_organisation_pt = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     receiver_organisation_es = sa.Column(sa.UnicodeText,
-        nullable=False, index=False)
+        nullable=False, index=True)
     receiver_organisation_type = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("receiver_organisation_type.code"),
