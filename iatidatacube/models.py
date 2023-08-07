@@ -222,25 +222,25 @@ class IATILine(db.Model):
         act_ForeignKey("flow_type.code"),
         nullable=True, index=True)
     provider_organisation = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     provider_organisation_fr = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     provider_organisation_pt = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     provider_organisation_es = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     provider_organisation_type = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("provider_organisation_type.code"),
         nullable=True, index=True)
     receiver_organisation = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     receiver_organisation_fr = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     receiver_organisation_pt = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     receiver_organisation_es = sa.Column(sa.UnicodeText,
-        nullable=False, index=True)
+        nullable=False)
     receiver_organisation_type = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("receiver_organisation_type.code"),
