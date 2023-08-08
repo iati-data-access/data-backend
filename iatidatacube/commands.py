@@ -1,7 +1,7 @@
 """Click commands."""
 import click
 from flask.cli import with_appcontext
-from iatidatacube.import_data import import_country, setup_db, drop_db, import_all, fetch_data, process_data, group_all, import_all_activities
+from iatidatacube.import_data import setup_db, drop_db, import_all, fetch_data, process_data, group_all, import_all_activities
 from iatidatacube.import_codelists import import_codelists
 
 
