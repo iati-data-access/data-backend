@@ -200,6 +200,7 @@ def import_all_activities(start_at='', end_at=''):
         if (csv_file == end_at): break
 
 
+@timeit(arguments_to_output=['csv_file'])
 def import_activities(csv_file):
     reporting_organisation_ref = None
     iati_identifiers = []
