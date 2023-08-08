@@ -9,9 +9,32 @@ import iatikit
 import iatiflattener
 from iatiflattener import group_data
 import pandas as pd
-import time
 import csv
 import datetime
+import hashlib
+import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import insert as postgres_insert
+
+
+from functools import wraps
+import time
+
+
+def timeit(f_py=None, arguments_to_output=[]):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            total_time = end_time - start_time
+            _args = "; ".join([f'{arg[0]}={arg[1]}' for arg in dict(**kwargs).items() if arg[0] in arguments_to_output])
+            if len(_args) > 0:
+                _args = ' with arguments ' + _args
+            print(f'Function {func.__name__}{_args} Took {total_time:.4f} seconds')
+            return result
+        return wrapper
+    return decorator(f_py) if callable(f_py) else decorator
 
 
 def get_groups_or_none(possible_match, index):
@@ -82,26 +105,31 @@ def add_or_update_dataset(csv_file, status='processing'):
     db.session.commit()
 
 
-def delete_dataset(csv_file):
+@timeit(arguments_to_output=['csv_file'])
+def delete_dataset(csv_file, inserted_ids):
+    print(f"Deleting ids no longer existing for {csv_file}")
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
     if dataset_type == 'budget':
         statement = sa.delete(IATILine).where(
             IATILine.recipient_country_or_region==dataset_country
         ).where(
             IATILine.transaction_type=='budget'
-        )
+        ).where(
+            ~IATILine.id.in_(inserted_ids))
         db.session.execute(statement)
     else:
         statement = sa.delete(IATILine).where(
             IATILine.recipient_country_or_region==dataset_country
         ).where(
             IATILine.transaction_type!='budget'
-        )
+        ).where(
+            ~IATILine.id.in_(inserted_ids))
         db.session.execute(statement)
 
-
-def add_row_from_csv(row, codelists, reporting_organisation):
-    il = IATILine()
+def row_from_csv(row, codelists, reporting_organisation,
+    provider_organisations, receiver_organisations,
+    langs = ['en', 'fr', 'es', 'pt']):
+    il = {}
     for key, value in row.items():
         map_keys = {
             'reporting_org_group': 'reporting_organisation_group',
@@ -125,11 +153,11 @@ def add_row_from_csv(row, codelists, reporting_organisation):
         }
         _key = map_keys.get(key, key)
         if _key in ('multi_country', 'humanitarian'):
-            setattr(il, _key, {'0': False, '1': True, 0: False, 1: True}[value])
+            il[_key] = {'0': False, '1': True, 0: False, 1: True}[value]
         elif _key in ('value_usd', 'value_eur', 'value_local_currrency'):
-            setattr(il, _key, float(value))
+            il[_key] = float(value)
         elif _key in ("reporting_org#en"):
-            il.reporting_organisation = reporting_organisation
+            il['reporting_organisation'] = reporting_organisation
         elif _key in ("aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector",
             "reporting_organisation_type",
@@ -137,7 +165,7 @@ def add_row_from_csv(row, codelists, reporting_organisation):
             "receiver_organisation_type"):
             if value not in codelists[_key]:
                 value = None
-            setattr(il, _key, value)
+            il[_key] = value
         elif _key in (
             "provider_organisation",
             "receiver_organisation",
@@ -145,10 +173,15 @@ def add_row_from_csv(row, codelists, reporting_organisation):
             "transaction_type", "sector_category", "sector",
             "recipient_country_or_region", "calendar_year",
             "calendar_quarter", "calendar_year_and_quarter"):
-            setattr(il, _key, value)
-        else:
-            setattr(il, _key, value)
-    db.session.add(il)
+            il[_key] = value
+        elif _key in IATILine.__table__.columns.keys():
+            il[_key] = value
+        _hash = hashlib.sha256()
+        _hash.update("".join([str(val) for val in il.values()]).encode())
+        il['id'] = _hash.hexdigest()
+        il['provider_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'provider_org#{lang}']) for lang in langs]))
+        il['receiver_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'receiver_org#{lang}']) for lang in langs]))
+    return il
 
 
 def import_all_activities(start_at='', end_at=''):
@@ -161,7 +194,7 @@ def import_all_activities(start_at='', end_at=''):
         if (csv_file != start_at) and (start == False):
             continue
         start = time.time()
-        import_activities(csv_file)
+        import_activities(csv_file=csv_file)
         end = time.time()
         print(f"Processed {csv_file} in {end-start}s")
         if (csv_file == end_at): break
@@ -173,12 +206,26 @@ def import_activities(csv_file):
     csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
     with open(csv_file_path, 'r') as _csv_file:
         csvreader = csv.DictReader(_csv_file)
+        activities = []
         for activity_row in csvreader:
             reporting_organisation_ref = activity_row['reporting_org_ref']
-            iati_identifiers.append(activity_row['iati_identifier'])
-            add_or_update_activity(activity_row)
-        db.session.commit()
+            iati_identifier = activity_row['iati_identifier']
+            if iati_identifier in iati_identifiers: continue
+            iati_identifiers.append(iati_identifier)
+            activities.append(add_or_update_activity(activity_row))
+        if len(activities) == 0: return
+        stmt = postgres_insert(IATIActivity).values(activities)
+        stmt = stmt.on_conflict_do_update(
+            constraint='iati_activity_pkey',
+            set_={col: getattr(stmt.excluded, col) for col in IATIActivity.__table__.columns.keys()})
+        db.session.execute(stmt)
+
     # Handle deleted IATI identifiers
+    statement = sa.delete(IATIActivity).where(
+        IATIActivity.reporting_organisation==reporting_organisation_ref
+    ).where(
+        ~IATIActivity.iati_identifier.in_(iati_identifiers))
+    db.session.execute(statement)
 
 
 def iso_date(value):
@@ -186,29 +233,30 @@ def iso_date(value):
 
 
 def add_or_update_activity(activity_row):
-    activity = IATIActivity.query.filter(
-        IATIActivity.iati_identifier==activity_row['iati_identifier']).first()
-    if activity is None:
-        activity = IATIActivity()
-        activity.iati_identifier = activity_row['iati_identifier']
-    activity.title = activity_row['title#en']
-    activity.title_fr = activity_row['title#fr']
-    activity.title_es = activity_row['title#es']
-    activity.title_pt = activity_row['title#pt']
-    activity.description = activity_row['description#en']
-    activity.description_fr = activity_row['description#fr']
-    activity.description_es = activity_row['description#es']
-    activity.description_pt = activity_row['description#pt']
-    activity.glide = activity_row['GLIDE']
-    activity.hrp = activity_row['HRP']
-    activity.location = activity_row['location']
-    activity._hash = activity_row['hash']
+    activity = {}
+    activity['iati_identifier'] = activity_row['iati_identifier']
+    activity['title'] = activity_row['title#en']
+    activity['title_fr'] = activity_row['title#fr']
+    activity['title_es'] = activity_row['title#es']
+    activity['title_pt'] = activity_row['title#pt']
+    activity['description'] = activity_row['description#en']
+    activity['description_fr'] = activity_row['description#fr']
+    activity['description_es'] = activity_row['description#es']
+    activity['description_pt'] = activity_row['description#pt']
+    activity['glide'] = activity_row['GLIDE']
+    activity['hrp'] = activity_row['HRP']
+    activity['location'] = activity_row['location']
+    activity['_hash'] = activity_row['hash']
+    activity['reporting_organisation'] = activity_row['reporting_org_ref']
     try:
-        activity.start_date = iso_date(activity_row['start_date'])
-        activity.end_date = iso_date(activity_row['end_date'])
+        activity['start_date'] = iso_date(activity_row['start_date'])
     except ValueError:
-        pass
-    db.session.add(activity)
+        activity['start_date'] = None
+    try:
+        activity['end_date'] = iso_date(activity_row['end_date'])
+    except ValueError:
+        activity['end_date'] = None
+    return activity
 
 
 def get_reporting_org(reporting_orgs, row):
@@ -220,13 +268,40 @@ def get_reporting_org(reporting_orgs, row):
     return reporting_orgs, reporting_orgs.get(ro_row)
 
 
-def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
-    add_or_update_dataset(csv_file, 'processing')
-    print(f"Deleting existing dataset for {csv_file}")
-    delete_dataset(csv_file)
-    print(f"Loading {csv_file}")
+def make_organisations_hash(data):
+    _hash = hashlib.sha256()
+    _hash.update("".join(data.values()).encode())
+    return _hash.hexdigest()
 
-    start = time.time()
+
+@timeit(arguments_to_output=['provider_receiver'])
+def get_organisations(df, provider_receiver='provider', langs=['en', 'fr', 'es', 'pt']):
+    records = df[
+        [f'{provider_receiver}_org#{lang}' for lang in langs]
+        ].drop_duplicates().to_dict(orient='records')
+    _records = {}
+    for record in records:
+        _record = {}
+        _record['id'] = make_organisations_hash(record)
+        # Don't create duplicate organisations
+        if _record['id'] in _records: continue
+        for lang in langs:
+            _record[f'name_{lang}'] = record[f'{provider_receiver}_org#{lang}']
+        _records[_record['id']] = _record
+    if len(_records) == 0: return {}
+
+    table = {'provider': ProviderOrganisation, 'receiver': ReceiverOrganisation}[provider_receiver]
+    stmt = postgres_insert(table).values(list(_records.values()))
+    stmt = stmt.on_conflict_do_update(
+        constraint=f'{provider_receiver}_organisation_pkey',
+        set_={col: getattr(stmt.excluded, col) for col in table.__table__.columns.keys()})
+    db.session.execute(stmt)
+    return _records
+
+
+@timeit(arguments_to_output=['csv_file'])
+def get_dataframe(csv_file, langs):
+    print(f"Loading {csv_file}")
     CSV_HEADERS = iatiflattener.lib.variables.headers(langs)
     _DTYPES = iatiflattener.lib.variables.dtypes(langs)
     headers = iatiflattener.lib.variables.group_by_headers_with_langs(langs)
@@ -241,27 +316,52 @@ def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
     df = df.groupby(headers)
     df = df.agg({'value_usd':'sum','value_eur':'sum','value_local':'sum'})
     df = df.reset_index()
-    end = time.time()
-    print(f"Reading data took {end-start}s")
+    return df
 
-    start = time.time()
+
+@timeit(arguments_to_output=[])
+def insert_or_update_rows(df, codelists, provider_organisations, receiver_organisations):
+    print("Inserting / updating financial data")
     reporting_orgs = {}
+    rows_to_insert = []
+    inserted_ids = []
     for i, row in df.iterrows():
         reporting_orgs, reporting_org = get_reporting_org(reporting_orgs, row)
         if reporting_org not in codelists['reporting_organisation']:
             print(f"Reporting organisation {reporting_org} not recognised, skipping.")
             continue
         try:
-            add_row_from_csv(row, codelists, reporting_org)
+            data = row_from_csv(row, codelists, reporting_org, provider_organisations, receiver_organisations)
+            rows_to_insert.append(data)
         except Exception as e:
-            print(f"Couldn't add row {i}, exception was {e}")
+            print(f"Couldn't get data for row {i}, exception was {e}")
             db.session.rollback()
-        if i % 1000 == 0:
-            db.session.commit()
-    db.session.commit()
-    end = time.time()
-    print(f"Committing rows took {end-start}s")
-    add_or_update_dataset(csv_file, 'complete')
+        # Insert / update for every 100,000 rows
+        if i % 100000 == 0:
+            stmt = postgres_insert(IATILine).values(rows_to_insert)
+            stmt = stmt.on_conflict_do_update(
+            constraint='iati_line_pkey',
+            set_={col: getattr(stmt.excluded, col) for col in IATILine.__table__.columns.keys()})
+            db.session.execute(stmt)
+            inserted_ids += [row['id'] for row in rows_to_insert]
+            rows_to_insert = []
+    return inserted_ids
+
+
+@timeit(arguments_to_output=['csv_file'])
+def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
+    add_or_update_dataset(csv_file=csv_file, status='processing')
+    df = get_dataframe(csv_file=csv_file, langs=langs)
+    print(f"Creating provider organisations")
+    provider_organisations = get_organisations(df=df,
+        provider_receiver='provider', langs=langs)
+    receiver_organisations = get_organisations(df=df,
+        provider_receiver='receiver', langs=langs)
+    inserted_ids = insert_or_update_rows(df=df, codelists=codelists,
+        provider_organisations=provider_organisations,
+        receiver_organisations=receiver_organisations)
+    delete_dataset(csv_file=csv_file, inserted_ids=inserted_ids)
+    add_or_update_dataset(csv_file=csv_file, status='complete')
 
 
 def fetch_data():
@@ -284,6 +384,16 @@ def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     shutil.copytree('output/csv/', 'output/web/csv/', dirs_exist_ok=True)
 
 
+@timeit
+def import_activities_files():
+    print("Loading and updating all activities...")
+    activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
+    for activity_csv_file in activity_files_to_import:
+        if not activity_csv_file.endswith('.csv'): continue
+        import_activities(csv_file=activity_csv_file)
+
+
+@timeit
 def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
     codelists = {
         "reporting_organisation_group": [item.code for item in ReportingOrganisationGroup.query.all()],
@@ -299,14 +409,7 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
         "sector": [item.code for item in Sector.query.all()],
         "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
     }
-    print("Loading and updating all activities...")
-    start = time.time()
-    activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
-    for activity_csv_file in activity_files_to_import:
-        if not activity_csv_file.endswith('.csv'): continue
-        import_activities(activity_csv_file)
-    end = time.time()
-    print(f"Loaded all activities in {end-start}s")
+    import_activities_files()
 
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
@@ -316,8 +419,5 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
         if not csv_file.endswith('.csv'): continue
         if (csv_file != start_at) and (start == False):
             continue
-        start = time.time()
-        import_from_csv(csv_file, codelists)
-        end = time.time()
-        print(f"Processed {csv_file} in {end-start}s")
+        import_from_csv(csv_file=csv_file, codelists=codelists)
         if (csv_file == end_at): break
