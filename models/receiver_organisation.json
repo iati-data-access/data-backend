@@ -1,0 +1,39 @@
+{
+    "fact_table": "receiver_organisation",
+    "hierarchies": {
+    },
+    "dimensions": {
+        "receiver_organisation": {
+            "attributes": {
+                "id": {
+                    "column": "id",
+                    "label": "ID",
+                    "type": "string"
+                },
+                "name_en": {
+                    "column": "name_en",
+                    "label": "Receiver Organisation",
+                    "type": "string"
+                },
+                "name_fr": {
+                    "column": "name_fr",
+                    "label": "Receiver Organisation",
+                    "type": "string"
+                },
+                "name_es": {
+                    "column": "name_es",
+                    "label": "Receiver Organisation",
+                    "type": "string"
+                },
+                "name_pt": {
+                    "column": "name_pt",
+                    "label": "Receiver Organisation",
+                    "type": "string"
+                }
+            },
+            "key_attribute": "id",
+            "label_attribute": "name_en",
+            "label": "Receiver Organisation"
+        }
+    }
+}
