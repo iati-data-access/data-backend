@@ -202,7 +202,6 @@ def import_all_activities(start_at='', end_at=''):
 
 @timeit(arguments_to_output=['csv_file'])
 def import_activities(csv_file, force_update=False):
-    print("force_update is", force_update)
     reporting_organisation_ref = None
     iati_identifiers = []
     csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
