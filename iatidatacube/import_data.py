@@ -201,25 +201,36 @@ def import_all_activities(start_at='', end_at=''):
 
 
 @timeit(arguments_to_output=['csv_file'])
-def import_activities(csv_file):
+def import_activities(csv_file, force_update=False):
+    print("force_update is", force_update)
     reporting_organisation_ref = None
     iati_identifiers = []
     csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
     with open(csv_file_path, 'r') as _csv_file:
         csvreader = csv.DictReader(_csv_file)
         activities = []
+        reporting_organisation_ref = csv_file.split('.csv')[0]
+        existing_activities_hashes = dict([(activity.iati_identifier, activity._hash) for activity in \
+            IATIActivity.query.filter_by(
+                    reporting_organisation=reporting_organisation_ref).all()])
         for activity_row in csvreader:
-            reporting_organisation_ref = activity_row['reporting_org_ref']
             iati_identifier = activity_row['iati_identifier']
-            if iati_identifier in iati_identifiers: continue
+            if iati_identifier in iati_identifiers:
+                continue
+            if (activity_row['hash'] == existing_activities_hashes.get(activity_row['iati_identifier'])
+                ) and (force_update is False):
+                continue
             iati_identifiers.append(iati_identifier)
             activities.append(add_or_update_activity(activity_row))
+
+        print(f"Inserting / updating {len(activities)} activities")
         if len(activities) == 0: return
         stmt = postgres_insert(IATIActivity).values(activities)
         stmt = stmt.on_conflict_do_update(
-            constraint='iati_activity_pkey',
+            index_elements=['iati_identifier'],
             set_={col: getattr(stmt.excluded, col) for col in IATIActivity.__table__.columns.keys()})
         db.session.execute(stmt)
+        db.session.commit()
 
     # Handle deleted IATI identifiers
     statement = sa.delete(IATIActivity).where(
@@ -297,6 +308,7 @@ def get_organisations(df, provider_receiver='provider', langs=['en', 'fr', 'es',
         constraint=f'{provider_receiver}_organisation_pkey',
         set_={col: getattr(stmt.excluded, col) for col in table.__table__.columns.keys()})
     db.session.execute(stmt)
+    db.session.commit()
     return _records
 
 
@@ -340,10 +352,10 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
         # Insert / update for every 100,000 rows
         if i % 100000 == 0:
             stmt = postgres_insert(IATILine).values(rows_to_insert)
-            stmt = stmt.on_conflict_do_update(
-            constraint='iati_line_pkey',
-            set_={col: getattr(stmt.excluded, col) for col in IATILine.__table__.columns.keys()})
+            stmt = stmt.on_conflict_do_nothing(
+              index_elements=['id'])
             db.session.execute(stmt)
+            db.session.commit()
             inserted_ids += [row['id'] for row in rows_to_insert]
             rows_to_insert = []
     return inserted_ids
@@ -386,16 +398,17 @@ def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
 
 
 @timeit
-def import_activities_files():
+def import_activities_files(force_update=False):
     print("Loading and updating all activities...")
     activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
     for activity_csv_file in activity_files_to_import:
         if not activity_csv_file.endswith('.csv'): continue
-        import_activities(csv_file=activity_csv_file)
+        import_activities(csv_file=activity_csv_file,
+            force_update=force_update)
 
 
 @timeit
-def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
+def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'], force_update=False):
     codelists = {
         "reporting_organisation_group": [item.code for item in ReportingOrganisationGroup.query.all()],
         "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
@@ -410,7 +423,7 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
         "sector": [item.code for item in Sector.query.all()],
         "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
     }
-    import_activities_files()
+    import_activities_files(force_update)
 
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':

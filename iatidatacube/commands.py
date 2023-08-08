@@ -40,11 +40,13 @@ def process():
 @click.command()
 @click.option('-s', 'start_at', default='')
 @click.option('-e', 'end_at', default='')
+@click.option('-f', 'force_update', is_flag=True)
 @with_appcontext
-def update(start_at, end_at):
+def update(start_at, end_at, force_update):
     """Updates all processed data."""
     import_codelists()
-    import_all(start_at, end_at)
+    import_all(start_at=start_at, end_at=end_at,
+        langs=['en', 'fr', 'es', 'pt'], force_update=force_update)
 
 
 @click.command()
