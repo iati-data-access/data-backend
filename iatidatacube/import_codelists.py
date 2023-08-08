@@ -2,6 +2,7 @@ import requests
 from iatidatacube.models import *
 from iatidatacube.extensions import db
 import iatiflattener
+from iatidatacube.import_data import timeit
 
 codelists_url = "https://codelists.codeforiati.org/api/json/{}/{}.json"
 
@@ -19,6 +20,7 @@ def get_multilang_codelist(codelist_name,
         for code, data in codelist.items():
             codelist[code][f'name_{lang}'] = req_data.get(code) or data['name_en']
     return codelist
+
 
 def write_codelist_values(codelist_name, codelist, with_no_data=True):
     translations = iatiflattener.lib.variables.TRANSLATIONS
@@ -50,13 +52,14 @@ def import_codelist(codelist_name):
     db.session.commit()
 
 
+@timeit
 def import_codelists():
     print("Importing codelists")
     codelist_columns = ['ReportingOrganisation', 'AidType',
         'FinanceType', 'FlowType', 'TransactionType', 'Sector',
         'OrganisationType']
     for codelist_column in codelist_columns:
-        import_codelist(codelist_column)
+        import_codelist(codelist_name=codelist_column)
     countries = get_multilang_codelist("Country")
     regions = get_multilang_codelist("Region")
     write_codelist_values("RecipientCountryorRegion", countries)
