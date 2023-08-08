@@ -53,38 +53,6 @@ def add_row(row, known_reporting_organisations):
     db.session.add(il)
 
 
-def import_data(filename, known_reporting_organisations):
-    print(f"Importing data for file {filename}")
-    csv_reader = get_data(filename, None, "Data")
-    for i, row in enumerate(csv_reader):
-        try:
-            add_row(row, known_reporting_organisations)
-        except Exception as e:
-            print(f"Couldn't add row {i}, exception was {e}")
-            db.session.rollback()
-        if i % 1000 == 0:
-            db.session.commit()
-    db.session.commit()
-
-
-def import_all_files():
-    known_reporting_organisations = [ro.code for ro in ReportingOrganisation.query.all()]
-    files = sorted([file for file in os.listdir('../data-en/') if file.endswith(".xlsx") and not file.startswith('~')])
-    for file in files:
-        try:
-            import_data(f"../data-en/{file}", known_reporting_organisations)
-        except Exception as e:
-            print(f"Exception with file {file}", e)
-
-
-def import_country(country_code='AF'):
-    start = time.time()
-    known_reporting_organisations = [ro.code for ro in ReportingOrganisation.query.all()]
-    import_data(f"../data-en/{country_code}.xlsx", known_reporting_organisations)
-    end = time.time()
-    print(f"Processed {csv_file} in {end-start}s")
-
-
 def setup_db():
     db.create_all()
 
