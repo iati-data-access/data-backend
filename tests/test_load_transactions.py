@@ -113,6 +113,25 @@ class TestLoadData:
         assert len(lines) == 138
 
 
+    def test_organisations(self, import_transactions, import_budgets):
+        df = import_data.get_dataframe(csv_file='transaction-LR.csv',
+            langs=['en', 'fr', 'es', 'pt'],
+            directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
+        assert len(df['provider_org#en'].unique()) == 1
+        assert len(df['receiver_org#en'].unique()) == 2
+        df2 = import_data.get_dataframe(csv_file='budget-LR.csv',
+            langs=['en', 'fr', 'es', 'pt'],
+            directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
+        assert len(df['provider_org#en'].unique()) == 1
+        assert len(df['receiver_org#en'].unique()) == 2
+        providers = ProviderOrganisation.query.all()
+        # NB 'World Bank' for budgets and 'International Development Association'
+        # for transactions...
+        assert len(providers) == 2, [provider.name_en for provider in providers]
+        receivers = ReceiverOrganisation.query.all()
+        assert len(receivers) == 2, [receiver.name_en for receiver in receivers]
+
+
     def _test_filter_transactions(self):
         """Wrote this to quickly filter a larger dataset to create a more manageable one"""
         with open(os.path.join('tests', 'fixtures', 'transactions', 'budget-LR.csv')) as csvfile:
