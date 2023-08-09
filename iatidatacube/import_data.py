@@ -222,6 +222,7 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
             iati_identifier = activity_row['iati_identifier']
             if iati_identifier in iati_identifiers:
                 continue
+            iati_identifiers.append(iati_identifier)
             if (activity_row['hash'] == existing_activities_hashes.get(activity_row['iati_identifier'])
                 ) and (force_update is False):
                 continue
@@ -238,11 +239,12 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
         db.session.commit()
 
     # Handle deleted IATI identifiers
+    identifiers_to_delete = filter(lambda identifier: identifier not in iati_identifiers, existing_activities_hashes.keys())
+
     statement = sa.delete(IATIActivity).where(
-        IATIActivity.reporting_organisation==reporting_organisation_ref
-    ).where(
-        ~IATIActivity.iati_identifier.in_(iati_identifiers))
+        IATIActivity.iati_identifier.in_(identifiers_to_delete))
     db.session.execute(statement)
+    db.session.commit()
 
 
 def iso_date(value):
