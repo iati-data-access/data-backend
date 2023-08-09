@@ -109,22 +109,28 @@ def add_or_update_dataset(csv_file, status='processing'):
 def delete_dataset(csv_file, inserted_ids):
     print(f"Deleting ids no longer existing for {csv_file}")
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
+    lines_transactions = IATILine.query.filter(
+        IATILine.recipient_country_or_region==dataset_country,
+        IATILine.transaction_type!='budget'
+        ).all()
+    identifiers_transactions = [line.id for line in lines_transactions]
+    lines_budgets = IATILine.query.filter(
+        IATILine.recipient_country_or_region==dataset_country,
+        IATILine.transaction_type=='budget'
+        ).all()
+    identifiers_budgets = [line.id for line in lines_budgets]
     if dataset_type == 'budget':
-        statement = sa.delete(IATILine).where(
-            IATILine.recipient_country_or_region==dataset_country
-        ).where(
-            IATILine.transaction_type=='budget'
-        ).where(
-            ~IATILine.id.in_(inserted_ids))
-        db.session.execute(statement)
+        identifiers_to_delete = [identifier for identifier in identifiers_budgets if identifier not in inserted_ids]
     else:
-        statement = sa.delete(IATILine).where(
-            IATILine.recipient_country_or_region==dataset_country
-        ).where(
-            IATILine.transaction_type!='budget'
-        ).where(
-            ~IATILine.id.in_(inserted_ids))
-        db.session.execute(statement)
+        identifiers_to_delete = [identifier for identifier in identifiers_transactions if identifier not in inserted_ids]
+    print("There are identifiers to delete")
+    print(identifiers_to_delete)
+    print("End identifiers to delete")
+    statement = sa.delete(IATILine).where(
+        IATILine.id.in_(identifiers_to_delete))
+    db.session.execute(statement)
+    db.session.commit()
+
 
 def row_from_csv(row, codelists, reporting_organisation,
     provider_organisations, receiver_organisations,
