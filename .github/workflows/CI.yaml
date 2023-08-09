@@ -38,11 +38,6 @@ jobs:
       run: |
         sudo -u postgres createdb --owner=iatidatabackend iatidatabackend
 
-    # Copy test config file
-    - name: Copy test config file
-      run: |
-        cp .github/workflows/test_config.py tests/config.py
-
     - name: Run tests
       run: pytest
       env:
