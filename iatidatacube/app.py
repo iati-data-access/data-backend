@@ -8,8 +8,8 @@ from iatidatacube import extensions, commands, xlsx_writer
 
 
 def create_app(config_object='config'):
-    app = Flask(__name__)
-    app.config.from_pyfile('../config.py')
+    app = Flask(__name__.split('.', maxsplit=1)[0])
+    app.config.from_object(config_object)
     CORS(app)
     extensions.db.init_app(app)
     extensions.migrate.init_app(app, extensions.db)
