@@ -7,16 +7,21 @@ from iatidatacube.import_data import timeit
 codelists_url = "https://codelists.codeforiati.org/api/json/{}/{}.json"
 
 
+def get_codelist_from_request(lang, codelist_name):
+    req = requests.get(codelists_url.format(lang, codelist_name))
+    return req.json()
+
+
 def get_multilang_codelist(codelist_name,
         aggregate_by='code', aggregate_name='name'):
-    req = requests.get(codelists_url.format('en', codelist_name))
+    req = get_codelist_from_request('en', codelist_name)
     codelist = dict([(item[aggregate_by], {
         'name_en': item.get(aggregate_name),
         'type': item.get('codeforiati:organisation-type-code')
-    }) for item in req.json()['data']])
+    }) for item in req['data']])
     for lang in ['fr', 'es', 'pt']:
-        req = requests.get(codelists_url.format(lang, codelist_name))
-        req_data = dict([(item[aggregate_by], item.get(aggregate_name)) for item in req.json()['data']])
+        req = get_codelist_from_request('en', codelist_name)
+        req_data = dict([(item[aggregate_by], item.get(aggregate_name)) for item in req['data']])
         for code, data in codelist.items():
             codelist[code][f'name_{lang}'] = req_data.get(code) or data['name_en']
     return codelist
