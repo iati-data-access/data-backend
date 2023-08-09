@@ -345,6 +345,16 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
     reporting_orgs = {}
     rows_to_insert = []
     inserted_ids = []
+
+    def do_insert(rows_to_insert):
+        if len(rows_to_insert) == 0: return []
+        stmt = postgres_insert(IATILine).values(rows_to_insert)
+        stmt = stmt.on_conflict_do_nothing(
+          index_elements=['id'])
+        db.session.execute(stmt)
+        db.session.commit()
+        return [row['id'] for row in rows_to_insert]
+
     for i, row in df.iterrows():
         reporting_orgs, reporting_org = get_reporting_org(reporting_orgs, row)
         if reporting_org not in codelists['reporting_organisation']:
