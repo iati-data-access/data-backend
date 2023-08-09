@@ -1,4 +1,4 @@
-git+https://github.com/markbrough/babbage@da99452e5694d1ce87e0a887f898e694f633bd24#egg=babbage
+git+https://github.com/markbrough/babbage@022cbb2831893ccb9e6bd87d2813291ac9bd84b0#egg=babbage
 Flask==2.2.2
 Flask-Migrate==4.0.3
 Flask-Cors==3.0.10
