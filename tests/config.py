@@ -1,4 +1,5 @@
-SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/iatidatacubetest'
+import os
+SQLALCHEMY_DATABASE_URI = os.environ.get('IATI_DATA_BACKEND_DB', 'postgresql://localhost/iatidatacubetest')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 FLASK_ENV='development'
 FLASK_DEBUG=False

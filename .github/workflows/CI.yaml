@@ -46,4 +46,4 @@ jobs:
     - name: Run tests
       run: pytest
       env:
-        BABBAGE_TEST_DB: postgresql://iatidatabackend:foo@localhost:5432/iatidatabackend
+        IATI_DATA_BACKEND_DB: postgresql://iatidatabackend:foo@localhost:5432/iatidatabackend
