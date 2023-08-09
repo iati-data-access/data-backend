@@ -618,18 +618,20 @@
         "value_usd": {
             "column": "value_usd",
             "label": "Value (USD)",
-            "type": "float"
+            "type": "float",
+            "aggregates": ["sum"]
         },
         "value_eur": {
             "column": "value_eur",
             "label": "Value (EUR)",
-            "type": "float"
+            "type": "float",
+            "aggregates": ["sum"]
         },
         "value_local_currrency": {
             "column": "value_local_currrency",
             "label": "Value (Local currency)",
-            "type": "float"
+            "type": "float",
+            "aggregates": ["sum"]
         }
-    },
-    "aggregates": ["sum"]
+    }
 }
