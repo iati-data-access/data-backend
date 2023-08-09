@@ -207,10 +207,10 @@ def import_all_activities(start_at='', end_at=''):
 
 
 @timeit(arguments_to_output=['csv_file'])
-def import_activities(csv_file, force_update=False):
+def import_activities(csv_file, force_update=False, directory=os.path.join('output', 'csv', 'activities')):
     reporting_organisation_ref = None
     iati_identifiers = []
-    csv_file_path = os.path.join('output', 'csv', 'activities', csv_file)
+    csv_file_path = os.path.join(directory, csv_file)
     with open(csv_file_path, 'r') as _csv_file:
         csvreader = csv.DictReader(_csv_file)
         activities = []
@@ -318,14 +318,14 @@ def get_organisations(df, provider_receiver='provider', langs=['en', 'fr', 'es',
 
 
 @timeit(arguments_to_output=['csv_file'])
-def get_dataframe(csv_file, langs):
+def get_dataframe(csv_file, langs, directory):
     print(f"Loading {csv_file}")
     CSV_HEADERS = iatiflattener.lib.variables.headers(langs)
     _DTYPES = iatiflattener.lib.variables.dtypes(langs)
     headers = iatiflattener.lib.variables.group_by_headers_with_langs(langs)
     CSV_HEADER_DTYPES = dict(map(lambda csv_header: (csv_header[1], _DTYPES[csv_header[0]]), enumerate(CSV_HEADERS)))
     # Don't read 'NA' as a NA value (it is Namibia)
-    df = pd.read_csv(os.path.join('output', 'csv', csv_file), dtype=CSV_HEADER_DTYPES)
+    df = pd.read_csv(os.path.join(directory, csv_file), dtype=CSV_HEADER_DTYPES)
     if 'NA' in csv_file:
         df.country_code = df.country_code.fillna('NA')
     all_relevant_headers = headers + ['value_usd', 'value_eur', 'value_local']
@@ -356,20 +356,18 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
             db.session.rollback()
         # Insert / update for every 100,000 rows
         if i % 100000 == 0:
-            stmt = postgres_insert(IATILine).values(rows_to_insert)
-            stmt = stmt.on_conflict_do_nothing(
-              index_elements=['id'])
-            db.session.execute(stmt)
-            db.session.commit()
-            inserted_ids += [row['id'] for row in rows_to_insert]
+            inserted_ids += do_insert(rows_to_insert)
             rows_to_insert = []
+    inserted_ids += do_insert(rows_to_insert)
     return inserted_ids
 
 
 @timeit(arguments_to_output=['csv_file'])
-def import_from_csv(csv_file, codelists, langs=['en', 'fr', 'es', 'pt']):
+def import_from_csv(csv_file, codelists,
+        langs=['en', 'fr', 'es', 'pt'],
+        directory=os.path.join('output', 'csv')):
     add_or_update_dataset(csv_file=csv_file, status='processing')
-    df = get_dataframe(csv_file=csv_file, langs=langs)
+    df = get_dataframe(csv_file=csv_file, langs=langs, directory=directory)
     print(f"Creating provider organisations")
     provider_organisations = get_organisations(df=df,
         provider_receiver='provider', langs=langs)
