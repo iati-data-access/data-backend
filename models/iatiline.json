@@ -296,31 +296,36 @@
         },
         "provider_organisation": {
             "attributes": {
+                "id": {
+                    "column": "provider_organisation.id",
+                    "label": "ID",
+                    "type": "string"
+                },
                 "name_en": {
-                    "column": "provider_organisation",
+                    "column": "provider_organisation.name_en",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_fr": {
-                    "column": "provider_organisation_fr",
+                    "column": "provider_organisation.name_fr",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_es": {
-                    "column": "provider_organisation_es",
+                    "column": "provider_organisation.name_es",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_pt": {
-                    "column": "provider_organisation_pt",
+                    "column": "provider_organisation.name_pt",
                     "label": "Name",
                     "type": "string"
                 }
             },
-            "key_attribute": "name_en",
+            "key_attribute": "id",
             "label_attribute": "name_en",
             "label": "Provider Organisation",
-            "join_column": "provider_organisation"
+            "join_column": "receiver_organisation_id"
         },
         "provider_organisation_type": {
             "attributes": {
@@ -357,31 +362,37 @@
         },
         "receiver_organisation": {
             "attributes": {
+                "id": {
+                    "column": "receiver_organisation.id",
+                    "label": "ID",
+                    "type": "string"
+                },
                 "name_en": {
-                    "column": "receiver_organisation",
+                    "column": "receiver_organisation.name_en",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_fr": {
-                    "column": "receiver_organisation_fr",
+                    "column": "receiver_organisation.name_fr",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_es": {
-                    "column": "receiver_organisation_es",
+                    "column": "receiver_organisation.name_es",
                     "label": "Name",
                     "type": "string"
                 },
                 "name_pt": {
-                    "column": "receiver_organisation_pt",
+                    "column": "receiver_organisation.name_pt",
                     "label": "Name",
                     "type": "string"
                 }
             },
-            "key_attribute": "name_en",
+            "key_attribute": "id",
             "label_attribute": "name_en",
             "label": "Receiver Organisation",
-            "join_column": "receiver_organisation"
+            "join_column": "receiver_organisation",
+            "join_column": "receiver_organisation_id"
         },
         "receiver_organisation_type": {
             "attributes": {
