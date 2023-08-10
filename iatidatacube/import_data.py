@@ -109,23 +109,22 @@ def add_or_update_dataset(csv_file, status='processing'):
 def delete_dataset(csv_file, inserted_ids):
     print(f"Deleting ids no longer existing for {csv_file}")
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
-    lines_transactions = IATILine.query.filter(
-        IATILine.recipient_country_or_region==dataset_country,
-        IATILine.transaction_type!='budget'
-        ).all()
-    identifiers_transactions = [line.id for line in lines_transactions]
-    lines_budgets = IATILine.query.filter(
-        IATILine.recipient_country_or_region==dataset_country,
-        IATILine.transaction_type=='budget'
-        ).all()
-    identifiers_budgets = [line.id for line in lines_budgets]
     if dataset_type == 'budget':
-        identifiers_to_delete = [identifier for identifier in identifiers_budgets if identifier not in inserted_ids]
+        q = sa.sql.expression.select(IATILine.id).where(
+            IATILine.recipient_country_or_region==dataset_country,
+            IATILine.transaction_type=='budget'
+        ).order_by(IATILine.id)
+        identifiers_budgets = [row.id for row in db.session.execute(q)]
+        identifiers_to_delete = list(filter(lambda identifier: identifier not in inserted_ids, identifiers_budgets))
     else:
-        identifiers_to_delete = [identifier for identifier in identifiers_transactions if identifier not in inserted_ids]
-    print("There are identifiers to delete")
-    print(identifiers_to_delete)
-    print("End identifiers to delete")
+        q = sa.sql.expression.select(IATILine.id).where(
+            IATILine.recipient_country_or_region==dataset_country,
+            IATILine.transaction_type!='budget'
+        ).order_by(IATILine.id)
+        identifiers_transactions = set([row.id for row in db.session.execute(q)])
+        identifiers_to_delete = list(filter(lambda identifier: identifier not in inserted_ids, identifiers_transactions))
+    print("There are identifiers to delete", identifiers_to_delete)
+    if len(identifiers_to_delete) == 0: return
     statement = sa.delete(IATILine).where(
         IATILine.id.in_(identifiers_to_delete))
     db.session.execute(statement)
