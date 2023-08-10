@@ -11,3 +11,4 @@ openpyxl==3.0.10
 iatikit==3.3.1
 iatiflattener==0.10.5
 pyexcelerate==0.10.0
+numpy==1.23.5

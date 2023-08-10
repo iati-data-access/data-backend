@@ -87,8 +87,9 @@ normality==2.4.0
     # via
     #   -r requirements.in
     #   babbage
-numpy==1.25.2
+numpy==1.23.5
     # via
+    #   -r requirements.in
     #   iatiflattener
     #   pandas
 openpyxl==3.0.10
