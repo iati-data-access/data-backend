@@ -431,22 +431,24 @@ def import_activities_files(force_update=False):
 
 
 @timeit
-def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'], force_update=False):
+def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'],
+        force_update=False, update_activities=True):
     codelists = {
-        "reporting_organisation_group": [item.code for item in ReportingOrganisationGroup.query.all()],
-        "reporting_organisation": [item.code for item in ReportingOrganisation.query.all()],
-        "reporting_organisation_type": [item.code for item in OrganisationType.query.all()],
-        "provider_organisation_type": [item.code for item in OrganisationType.query.all()],
-        "receiver_organisation_type": [item.code for item in OrganisationType.query.all()],
-        "aid_type": [item.code for item in AidType.query.all()],
-        "finance_type": [item.code for item in FinanceType.query.all()],
-        "flow_type": [item.code for item in FlowType.query.all()],
-        "transaction_type": [item.code for item in TransactionType.query.all()],
-        "sector_category": [item.code for item in SectorCategory.query.all()],
-        "sector": [item.code for item in Sector.query.all()],
-        "recipient_country_or_region": [item.code for item in RecipientCountryorRegion.query.all()]
+        "reporting_organisation_group": set([item.code for item in ReportingOrganisationGroup.query.all()]),
+        "reporting_organisation": set([item.code for item in ReportingOrganisation.query.all()]),
+        "reporting_organisation_type": set([item.code for item in OrganisationType.query.all()]),
+        "provider_organisation_type": set([item.code for item in OrganisationType.query.all()]),
+        "receiver_organisation_type": set([item.code for item in OrganisationType.query.all()]),
+        "aid_type": set([item.code for item in AidType.query.all()]),
+        "finance_type": set([item.code for item in FinanceType.query.all()]),
+        "flow_type": set([item.code for item in FlowType.query.all()]),
+        "transaction_type": set([item.code for item in TransactionType.query.all()]),
+        "sector_category": set([item.code for item in SectorCategory.query.all()]),
+        "sector": set([item.code for item in Sector.query.all()]),
+        "recipient_country_or_region": set([item.code for item in RecipientCountryorRegion.query.all()])
     }
-    import_activities_files(force_update)
+    if update_activities:
+        import_activities_files(force_update)
 
     files_to_import = sorted(os.listdir('output/csv/'))
     if start_at != '':
