@@ -217,24 +217,25 @@ def import_all_activities(start_at='', end_at='', force_update=False):
 @timeit(arguments_to_output=['csv_file'])
 def import_activities(csv_file, force_update=False, directory=os.path.join('output', 'csv', 'activities')):
     reporting_organisation_ref = None
-    iati_identifiers = []
+    iati_identifiers = set()
     csv_file_path = os.path.join(directory, csv_file)
     with open(csv_file_path, 'r') as _csv_file:
         csvreader = csv.DictReader(_csv_file)
         activities = []
         reporting_organisation_ref = csv_file.split('.csv')[0]
-        existing_activities_hashes = dict([(activity.iati_identifier, activity._hash) for activity in \
-            IATIActivity.query.filter_by(
-                    reporting_organisation=reporting_organisation_ref).all()])
+        q = sa.sql.expression.select(IATIActivity.iati_identifier, IATIActivity._hash).where(
+            IATIActivity.reporting_organisation==reporting_organisation_ref
+        )
+        existing_activities_hashes = dict([(activity.iati_identifier, activity._hash) \
+            for activity in db.session.execute(q)])
         for activity_row in csvreader:
             iati_identifier = activity_row['iati_identifier']
-            if iati_identifier in iati_identifiers:
+            if iati_identifier in iati_identifiers: # Ignore duplicates
                 continue
-            iati_identifiers.append(iati_identifier)
+            iati_identifiers.add(iati_identifier)
             if (activity_row['hash'] == existing_activities_hashes.get(activity_row['iati_identifier'])
                 ) and (force_update is False):
                 continue
-            iati_identifiers.append(iati_identifier)
             activities.append(add_or_update_activity(activity_row))
 
         print(f"Inserting / updating {len(activities)} activities")
@@ -247,8 +248,9 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
         db.session.commit()
 
     # Handle deleted IATI identifiers
-    identifiers_to_delete = filter(lambda identifier: identifier not in iati_identifiers, existing_activities_hashes.keys())
-
+    identifiers_to_delete = list(filter(lambda identifier: identifier not in iati_identifiers, existing_activities_hashes.keys()))
+    if len(identifiers_to_delete) > 0:
+        print(f"Deleting {len(identifiers_to_delete)} activities")
     statement = sa.delete(IATIActivity).where(
         IATIActivity.iati_identifier.in_(identifiers_to_delete))
     db.session.execute(statement)
@@ -352,7 +354,7 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
     print("Inserting / updating financial data")
     reporting_orgs = {}
     rows_to_insert = []
-    inserted_ids = []
+    inserted_ids = set()
 
     def do_insert(rows_to_insert):
         if len(rows_to_insert) == 0: return []
@@ -361,7 +363,7 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
           index_elements=['id'])
         db.session.execute(stmt)
         db.session.commit()
-        return [row['id'] for row in rows_to_insert]
+        return set([row['id'] for row in rows_to_insert])
 
     for i, row in df.iterrows():
         reporting_orgs, reporting_org = get_reporting_org(reporting_orgs, row)
@@ -374,11 +376,11 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
         except Exception as e:
             print(f"Couldn't get data for row {i}, exception was {e}")
             db.session.rollback()
-        # Insert / update for every 100,000 rows
-        if i % 100000 == 0:
-            inserted_ids += do_insert(rows_to_insert)
+        # Insert / update for every 10,000 rows
+        if i % 10000 == 0:
+            inserted_ids.update(do_insert(rows_to_insert))
             rows_to_insert = []
-    inserted_ids += do_insert(rows_to_insert)
+    inserted_ids.update(do_insert(rows_to_insert))
     return inserted_ids
 
 
