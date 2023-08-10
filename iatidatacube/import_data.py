@@ -161,8 +161,6 @@ def row_from_csv(row, codelists, reporting_organisation,
             il[_key] = {'0': False, '1': True, 0: False, 1: True}[value]
         elif _key in ('value_usd', 'value_eur', 'value_local_currrency'):
             il[_key] = float(value)
-        elif _key in ("reporting_org#en"):
-            il['reporting_organisation'] = reporting_organisation
         elif _key in ("aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector",
             "reporting_organisation_type",
@@ -173,19 +171,29 @@ def row_from_csv(row, codelists, reporting_organisation,
             il[_key] = value
         elif _key in (
             "provider_organisation",
+            "provider_organisation_fr",
+            "provider_organisation_es",
+            "provider_organisation_pt",
             "receiver_organisation",
+            "receiver_organisation_fr",
+            "receiver_organisation_es",
+            "receiver_organisation_pt",
             "aid_type", "finance_type", "flow_type",
             "transaction_type", "sector_category", "sector",
             "recipient_country_or_region", "calendar_year",
-            "calendar_quarter", "calendar_year_and_quarter"):
+            "calendar_quarter", "calendar_year_and_quarter",
+            "iati_identifier", "reporting_organisation_group",
+            "url"):
             il[_key] = value
-        elif _key in IATILine.__table__.columns.keys():
-            il[_key] = value
-        _hash = hashlib.sha256()
-        _hash.update("".join([str(val) for val in il.values()]).encode())
-        il['id'] = _hash.hexdigest()
-        il['provider_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'provider_org#{lang}']) for lang in langs]))
-        il['receiver_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'receiver_org#{lang}']) for lang in langs]))
+        # The following column names are ignored:
+        # title#fr, title#en, title#es, title#pt => on activities
+        # reporting_org#en, reporting_org#es, reporting_org#fr, reporting_org#pt => we just use the reference
+    _hash = hashlib.sha256()
+    _hash.update("".join([str(val) for val in il.values()]).encode())
+    il['id'] = _hash.hexdigest()
+    il['reporting_organisation'] = reporting_organisation
+    il['provider_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'provider_org#{lang}']) for lang in langs]))
+    il['receiver_organisation_id'] = make_organisations_hash(dict([(f'provider_org#{lang}', row[f'receiver_org#{lang}']) for lang in langs]))
     return il
 
 
