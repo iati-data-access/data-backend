@@ -352,12 +352,13 @@ def get_dataframe(csv_file, langs, directory):
 @timeit(arguments_to_output=[])
 def insert_or_update_rows(df, codelists, provider_organisations, receiver_organisations):
     print("Inserting / updating financial data")
+    print(f"There are {len(df)} rows in this dataset.")
     reporting_orgs = {}
     rows_to_insert = []
     inserted_ids = set()
 
     def do_insert(rows_to_insert):
-        if len(rows_to_insert) == 0: return []
+        if len(rows_to_insert) == 0: return set([])
         stmt = postgres_insert(IATILine).values(rows_to_insert)
         stmt = stmt.on_conflict_do_nothing(
           index_elements=['id'])
@@ -376,8 +377,9 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
         except Exception as e:
             print(f"Couldn't get data for row {i}, exception was {e}")
             db.session.rollback()
-        # Insert / update for every 10,000 rows
-        if i % 10000 == 0:
+        # Insert / update for every 5,000 rows
+        if i % 5000 == 0:
+            print(f"Inserting for first {i} rows")
             inserted_ids.update(do_insert(rows_to_insert))
             rows_to_insert = []
     inserted_ids.update(do_insert(rows_to_insert))
