@@ -16,6 +16,10 @@ source ./pyenv/bin/activate
 pip install -r requirements.txt
 ```
 
+NB on OSX, you may have to install PostgreSQL bindings separately:
+
+```pip install psycopg2-binary --force-reinstall --no-cache-dir```
+
 2. Set up a database:
 
 ```
@@ -35,6 +39,27 @@ cp config.py.tmpl config.py
 * cdfd.service -> systemd service
 
 5. Setup [certbot](https://certbot.eff.org/instructions)
+
+
+## Running tests
+
+1. Install the dependencies:
+
+```
+pip install -r requirements_dev.txt
+```
+
+2. Configure the path to the test database in an environment variable:
+
+```
+export IATI_DATA_BACKEND_DB = 'postgresql://localhost/iatidatacubetest'
+```
+
+3. Run the tests:
+```
+pytest
+```
+
 
 ## When the database model changes
 
