@@ -197,7 +197,8 @@ def row_from_csv(row, codelists, reporting_organisation,
     return il
 
 
-def import_all_activities(start_at='', end_at=''):
+@timeit
+def import_all_activities(start_at='', end_at='', force_update=False):
     files_to_import = sorted(os.listdir('output/csv/activities/'))
     if start_at != '':
         start = False
@@ -207,7 +208,7 @@ def import_all_activities(start_at='', end_at=''):
         if (csv_file != start_at) and (start == False):
             continue
         start = time.time()
-        import_activities(csv_file=csv_file)
+        import_activities(csv_file=csv_file, force_update=force_update)
         end = time.time()
         print(f"Processed {csv_file} in {end-start}s")
         if (csv_file == end_at): break
