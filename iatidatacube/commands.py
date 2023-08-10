@@ -41,12 +41,18 @@ def process():
 @click.option('-s', 'start_at', default='')
 @click.option('-e', 'end_at', default='')
 @click.option('-f', 'force_update', is_flag=True)
+@click.option('-c', 'dont_update_codelists', is_flag=True)
+@click.option('-a', 'dont_update_activities', is_flag=True)
 @with_appcontext
-def update(start_at, end_at, force_update):
+def update(start_at, end_at, force_update,
+        dont_update_codelists, dont_update_activities):
     """Updates all processed data."""
-    import_codelists()
+    if not(dont_update_codelists):
+        import_codelists()
     import_all(start_at=start_at, end_at=end_at,
-        langs=['en', 'fr', 'es', 'pt'], force_update=force_update)
+        langs=['en', 'fr', 'es', 'pt'],
+        force_update=force_update,
+        update_activities=not(dont_update_activities))
 
 
 @click.command()
@@ -61,7 +67,8 @@ def group(start_at, end_at):
 @click.command()
 @click.option('-s', 'start_at', default='')
 @click.option('-e', 'end_at', default='')
+@click.option('-f', 'force_update', is_flag=True)
 @with_appcontext
-def update_activities_only(start_at, end_at):
+def update_activities_only(start_at, end_at, force_update):
     """Updates activity data only."""
-    import_all_activities(start_at, end_at)
+    import_all_activities(start_at, end_at, force_update)
