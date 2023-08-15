@@ -260,10 +260,10 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
     batch_amount = 20
     for i in range(0, math.ceil(len(identifiers_to_delete)/batch_amount)):
         batch_start = i*batch_amount
-        batch_end = (i*batch_amount)+(batch_amount-1)
+        batch_end = (i*batch_amount)+(batch_amount)
         batch_identifiers = identifiers_to_delete[batch_start:batch_end]
         statement = sa.delete(IATIActivity).where(
-            IATIActivity.iati_identifier.in_(identifiers_to_delete)
+            IATIActivity.iati_identifier.in_(batch_identifiers)
             ).execution_options(synchronize_session=False)
         db.session.execute(statement)
         db.session.commit()
