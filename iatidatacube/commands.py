@@ -38,11 +38,11 @@ def process():
 
 
 @click.command()
-@click.option('-s', 'start_at', default='')
-@click.option('-e', 'end_at', default='')
-@click.option('-f', 'force_update', is_flag=True)
-@click.option('-c', 'dont_update_codelists', is_flag=True)
-@click.option('-a', 'dont_update_activities', is_flag=True)
+@click.option('-s', 'start_at', default='', help="Filename to start processing at")
+@click.option('-e', 'end_at', default='', help="Filename to end processing at")
+@click.option('-f', 'force_update', is_flag=True, help="Update activities regardless of whether hashes have changed")
+@click.option('-c', 'dont_update_codelists', is_flag=True, help="Don't update codelists")
+@click.option('-a', 'dont_update_activities', is_flag=True, help="Don't update activities")
 @with_appcontext
 def update(start_at, end_at, force_update,
         dont_update_codelists, dont_update_activities):
@@ -56,8 +56,8 @@ def update(start_at, end_at, force_update,
 
 
 @click.command()
-@click.option('-s', 'start_at', default='')
-@click.option('-e', 'end_at', default='')
+@click.option('-s', 'start_at', default='', help="Filename to start processing at")
+@click.option('-e', 'end_at', default='', help="Filename to end processing at")
 @with_appcontext
 def group(start_at, end_at):
     """Groups processed data into XLSX files for publication."""
@@ -65,9 +65,9 @@ def group(start_at, end_at):
 
 
 @click.command()
-@click.option('-s', 'start_at', default='')
-@click.option('-e', 'end_at', default='')
-@click.option('-f', 'force_update', is_flag=True)
+@click.option('-s', 'start_at', default='', help="Filename to start processing at")
+@click.option('-e', 'end_at', default='', help="Filename to end processing at")
+@click.option('-f', 'force_update', is_flag=True, help="Update activities regardless of whether hashes have changed")
 @with_appcontext
 def update_activities_only(start_at, end_at, force_update):
     """Updates activity data only."""
