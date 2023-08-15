@@ -32,17 +32,17 @@
                 },
                 "title_fr": {
                     "column": "iati_activity.title_fr",
-                    "label": "Title",
+                    "label": "Titre",
                     "type": "string"
                 },
                 "title_es": {
                     "column": "iati_activity.title_es",
-                    "label": "Title",
+                    "label": "Título de la actividad",
                     "type": "string"
                 },
                 "title_pt": {
                     "column": "iati_activity.title_pt",
-                    "label": "Title",
+                    "label": "Título da atividade",
                     "type": "string"
                 },
                 "description_en": {
@@ -105,22 +105,22 @@
                 },
                 "name_en": {
                     "column": "reporting_organisation_group.name_en",
-                    "label": "Name",
+                    "label": "Reporting Organisation Group",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "reporting_organisation_group.name_fr",
-                    "label": "Name",
+                    "label": "Groupes d’organismes déclarantes",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "reporting_organisation_group.name_es",
-                    "label": "Name",
+                    "label": "Grupo de Organizaciones Notificadoras",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "reporting_organisation_group.name_pt",
-                    "label": "Name",
+                    "label": "Grupo de organizações relatórios",
                     "type": "string"
                 }
             },
@@ -138,22 +138,22 @@
                 },
                 "name_en": {
                     "column": "reporting_organisation.name_en",
-                    "label": "Name",
+                    "label": "Reporting Organisation",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "reporting_organisation.name_fr",
-                    "label": "Name",
+                    "label": "Organisme déclarant",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "reporting_organisation.name_es",
-                    "label": "Name",
+                    "label": "Organización notificadora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "reporting_organisation.name_pt",
-                    "label": "Name",
+                    "label": "Organização relatora",
                     "type": "string"
                 }
             },
@@ -171,22 +171,22 @@
                 },
                 "name_en": {
                     "column": "organisation_type.name_en",
-                    "label": "Name",
+                    "label": "Reporting Organisation Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "organisation_type.name_fr",
-                    "label": "Name",
+                    "label": "Type d’organisme déclarant",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "organisation_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de organización notificadora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "organisation_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de organização relatora",
                     "type": "string"
                 }
             },
@@ -204,22 +204,22 @@
                 },
                 "name_en": {
                     "column": "aid_type.name_en",
-                    "label": "Name",
+                    "label": "Aid Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "aid_type.name_fr",
-                    "label": "Name",
+                    "label": "Type d’aide",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "aid_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de ayuda",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "aid_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de ajuda",
                     "type": "string"
                 }
             },
@@ -237,22 +237,22 @@
                 },
                 "name_en": {
                     "column": "finance_type.name_en",
-                    "label": "Name",
+                    "label": "Finance Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "finance_type.name_fr",
-                    "label": "Name",
+                    "label": "Type de financement",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "finance_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de financiación",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "finance_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de financiamento",
                     "type": "string"
                 }
             },
@@ -270,22 +270,22 @@
                 },
                 "name_en": {
                     "column": "flow_type.name_en",
-                    "label": "Name",
+                    "label": "Flow Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "flow_type.name_fr",
-                    "label": "Name",
+                    "label": "Type de flux",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "flow_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de flujo",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "flow_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de fluxo",
                     "type": "string"
                 }
             },
@@ -303,22 +303,22 @@
                 },
                 "name_en": {
                     "column": "provider_organisation.name_en",
-                    "label": "Name",
+                    "label": "Provider Organisation",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "provider_organisation.name_fr",
-                    "label": "Name",
+                    "label": "Organisme prestataire",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "provider_organisation.name_es",
-                    "label": "Name",
+                    "label": "Organización proveedora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "provider_organisation.name_pt",
-                    "label": "Name",
+                    "label": "Organização prestadora",
                     "type": "string"
                 }
             },
@@ -336,22 +336,22 @@
                 },
                 "name_en": {
                     "column": "provider_organisation_type.name_en",
-                    "label": "Name",
+                    "label": "Provider Organisation Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "provider_organisation_type.name_fr",
-                    "label": "Name",
+                    "label": "Type d’organisme prestataire",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "provider_organisation_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de organización proveedora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "provider_organisation_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de organização prestadora",
                     "type": "string"
                 }
             },
@@ -369,22 +369,22 @@
                 },
                 "name_en": {
                     "column": "receiver_organisation.name_en",
-                    "label": "Name",
+                    "label": "Receiver Organisation",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "receiver_organisation.name_fr",
-                    "label": "Name",
+                    "label": "Organisme bénéficiaire",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "receiver_organisation.name_es",
-                    "label": "Name",
+                    "label": "Organización receptora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "receiver_organisation.name_pt",
-                    "label": "Name",
+                    "label": "Organização recetora",
                     "type": "string"
                 }
             },
@@ -403,22 +403,22 @@
                 },
                 "name_en": {
                     "column": "receiver_organisation_type.name_en",
-                    "label": "Name",
+                    "label": "Receiver Organisation Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "receiver_organisation_type.name_fr",
-                    "label": "Name",
+                    "label": "Type d’organisme bénéficiaire",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "receiver_organisation_type.name_es",
-                    "label": "Name",
+                    "label": "Tipo de organización receptora",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "receiver_organisation_type.name_pt",
-                    "label": "Name",
+                    "label": "Tipo de organização recetora",
                     "type": "string"
                 }
             },
@@ -436,22 +436,22 @@
                 },
                 "name_en": {
                     "column": "transaction_type.name_en",
-                    "label": "Name",
+                    "label": "Transaction Type",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "transaction_type.name_fr",
-                    "label": "Name",
+                    "label": "Flux de Ressources",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "transaction_type.name_es",
-                    "label": "Name",
+                    "label": "Flujos de Recursos",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "transaction_type.name_pt",
-                    "label": "Name",
+                    "label": "Fluxos de Recurso",
                     "type": "string"
                 }
             },
@@ -469,22 +469,22 @@
                 },
                 "name_en": {
                     "column": "recipient_country_or_region.name_en",
-                    "label": "Name",
+                    "label": "Recipient Country or Region",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "recipient_country_or_region.name_fr",
-                    "label": "Name",
+                    "label": "Pays ou région bénéficiaire",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "recipient_country_or_region.name_es",
-                    "label": "Name",
+                    "label": "País o región receptores",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "recipient_country_or_region.name_pt",
-                    "label": "Name",
+                    "label": "País ou região recetor",
                     "type": "string"
                 }
             },
@@ -514,22 +514,22 @@
                 },
                 "name_en": {
                     "column": "sector_category.name_en",
-                    "label": "Name",
+                    "label": "Sector Category",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "sector_category.name_fr",
-                    "label": "Name",
+                    "label": "Catégorie de secteur",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "sector_category.name_es",
-                    "label": "Name",
+                    "label": "Categoría de sector",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "sector_category.name_pt",
-                    "label": "Name",
+                    "label": "Categoria de sector",
                     "type": "string"
                 }
             },
@@ -547,22 +547,22 @@
                 },
                 "name_en": {
                     "column": "sector.name_en",
-                    "label": "Name",
+                    "label": "Sector",
                     "type": "string"
                 },
                 "name_fr": {
                     "column": "sector.name_fr",
-                    "label": "Name",
+                    "label": "Secteur",
                     "type": "string"
                 },
                 "name_es": {
                     "column": "sector.name_es",
-                    "label": "Name",
+                    "label": "Sector",
                     "type": "string"
                 },
                 "name_pt": {
                     "column": "sector.name_pt",
-                    "label": "Name",
+                    "label": "Sector",
                     "type": "string"
                 }
             },
