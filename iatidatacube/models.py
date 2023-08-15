@@ -247,7 +247,11 @@ class IATILine(db.Model):
     __tablename__="iati_line"
     id = sa.Column(sa.UnicodeText, primary_key=True)
     iati_identifier = sa.Column(sa.UnicodeText,
-        act_ForeignKey("iati_activity.iati_identifier"))
+        act_ForeignKey("iati_activity.iati_identifier"),
+        nullable=False, index=True)
+    iati_activity = sa.orm.relationship(
+        "IATIActivity", backref=sa.orm.backref("iati_lines", cascade="all, delete-orphan")
+    )
     reporting_organisation_group = sa.Column(
         sa.UnicodeText,
         act_ForeignKey("reporting_organisation_group.code"),
