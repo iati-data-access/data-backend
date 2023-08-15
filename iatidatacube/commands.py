@@ -8,7 +8,7 @@ from iatidatacube.import_codelists import import_codelists
 @click.command()
 @with_appcontext
 def setup_codelists():
-    """Create database and setup codelists."""
+    """Setup codelists."""
     import_codelists()
 
 
