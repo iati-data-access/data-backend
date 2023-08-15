@@ -20,7 +20,7 @@ def get_multilang_codelist(codelist_name,
         'type': item.get('codeforiati:organisation-type-code')
     }) for item in req['data']])
     for lang in ['fr', 'es', 'pt']:
-        req = get_codelist_from_request('en', codelist_name)
+        req = get_codelist_from_request(lang, codelist_name)
         req_data = dict([(item[aggregate_by], item.get(aggregate_name)) for item in req['data']])
         for code, data in codelist.items():
             codelist[code][f'name_{lang}'] = req_data.get(code) or data['name_en']
