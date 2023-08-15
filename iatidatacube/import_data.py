@@ -252,7 +252,8 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
     if len(identifiers_to_delete) > 0:
         print(f"Deleting {len(identifiers_to_delete)} activities")
     statement = sa.delete(IATIActivity).where(
-        IATIActivity.iati_identifier.in_(identifiers_to_delete))
+        IATIActivity.iati_identifier.in_(identifiers_to_delete)
+        ).execution_options(synchronize_session=False)
     db.session.execute(statement)
     db.session.commit()
 
