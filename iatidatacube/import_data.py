@@ -2,6 +2,7 @@ from normality import slugify
 import re
 import os
 import shutil
+import math
 from iatidatacube.xlsx_to_csv import get_data
 from iatidatacube.models import *
 from iatidatacube.extensions import db
@@ -239,23 +240,33 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
             activities.append(add_or_update_activity(activity_row))
 
         print(f"Inserting / updating {len(activities)} activities")
-        if len(activities) == 0: return
-        stmt = postgres_insert(IATIActivity).values(activities)
-        stmt = stmt.on_conflict_do_update(
-            index_elements=['iati_identifier'],
-            set_={col: getattr(stmt.excluded, col) for col in IATIActivity.__table__.columns.keys()})
-        db.session.execute(stmt)
-        db.session.commit()
+        if len(activities) > 0:
+            stmt = postgres_insert(IATIActivity).values(activities)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['iati_identifier'],
+                set_={col: getattr(stmt.excluded, col) for col in IATIActivity.__table__.columns.keys()})
+            db.session.execute(stmt)
+            db.session.commit()
 
     # Handle deleted IATI identifiers
     identifiers_to_delete = list(filter(lambda identifier: identifier not in iati_identifiers, existing_activities_hashes.keys()))
     if len(identifiers_to_delete) > 0:
         print(f"Deleting {len(identifiers_to_delete)} activities")
-    statement = sa.delete(IATIActivity).where(
-        IATIActivity.iati_identifier.in_(identifiers_to_delete)
-        ).execution_options(synchronize_session=False)
-    db.session.execute(statement)
-    db.session.commit()
+    else:
+        print(f"There are no identifiers to delete for {reporting_organisation_ref}")
+        return
+
+    # Delete in batches of 20 for performance reasons
+    batch_amount = 20
+    for i in range(0, math.ceil(len(identifiers_to_delete)/batch_amount)):
+        batch_start = i*batch_amount
+        batch_end = (i*batch_amount)+(batch_amount-1)
+        batch_identifiers = identifiers_to_delete[batch_start:batch_end]
+        statement = sa.delete(IATIActivity).where(
+            IATIActivity.iati_identifier.in_(identifiers_to_delete)
+            ).execution_options(synchronize_session=False)
+        db.session.execute(statement)
+        db.session.commit()
 
 
 def iso_date(value):
