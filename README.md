@@ -16,9 +16,20 @@ source ./pyenv/bin/activate
 pip install -r requirements.txt
 ```
 
-NB on OSX, you may have to install PostgreSQL bindings separately:
+NB1: on OSX, you may have to install PostgreSQL bindings separately:
 
-```pip install psycopg2-binary --force-reinstall --no-cache-dir```
+```
+pip install psycopg2-binary --force-reinstall --no-cache-dir
+```
+
+On Ubuntu, you may need to install `libpq-dev` for `psycopg2` to build:
+
+```
+sudo apt install libpq-dev
+```
+
+NB2: This tool currently depends on `grako 3.10.1` which is not compatible with Python 3.10 or greater.
+
 
 2. Set up a database:
 
@@ -84,7 +95,7 @@ flask download
 2. Process the data using the CDFD scripts - outputs data to `/output/csv/`, creating two files (transactions, and budgets) per country/region:
 
 ```
-flask process-data
+flask process
 ```
 
 3. Setup codelists in the database:
@@ -119,5 +130,5 @@ flask group
 6. If you want to delete everything from the database and start again, you can run:
 
 ```
-flask drop-db
+flask drop-all
 ```

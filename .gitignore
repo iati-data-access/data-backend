@@ -8,3 +8,5 @@ output
 config.py
 generate_model.py
 model_template.json
+.ackrc
+.idea
