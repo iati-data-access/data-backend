@@ -44,39 +44,6 @@ def get_groups_or_none(possible_match, index):
     return None
 
 
-def add_row(row, known_reporting_organisations):
-    il = IATILine()
-    for key, value in row.items():
-        _key = slugify(key).replace("-", "_")
-        if _key in ('multi_country', 'humanitarian'):
-            setattr(il, _key, {'0': False, '1': True, 0: False, 1: True}[value])
-        elif _key in ('value_usd', 'value_eur', 'value_local_currrency'):
-            setattr(il, _key, float(value))
-        elif _key in ("reporting_organisation"):
-            ro = get_groups_or_none(re.match(r"(.*) \[(.*)\]",
-                value), 1)
-            if ro not in known_reporting_organisations:
-                print(f"Reporting organisation {ro} not recognised, skipping.")
-                return
-            il.reporting_organisation = ro
-        elif _key in ("reporting_organisation_type",
-            "provider_organisation_type",
-            "receiver_organisation_type",
-            "aid_type", "finance_type", "flow_type",
-            "transaction_type", "sector_category", "sector",
-            "recipient_country_or_region"):
-            setattr(il, _key, get_groups_or_none(re.match(r"(\w*) - (.*)", value), 0))
-        elif _key in ("title"):
-            if IATIActivity.query.get(row['IATI Identifier']) is None:
-                act = IATIActivity()
-                act.iati_identifier = row['IATI Identifier']
-                act.title = row['Title']
-                db.session.add(act)
-        else:
-            setattr(il, _key, value)
-    db.session.add(il)
-
-
 def setup_db():
     db.create_all()
 
