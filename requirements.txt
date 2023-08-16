@@ -10,7 +10,7 @@ attrs==23.1.0
     # via
     #   jsonschema
     #   referencing
-git+https://github.com/markbrough/babbage@2beddc4459018199e3857c2c17a41ad081c70823#egg=babbage==0.6.0
+git+https://github.com/markbrough/babbage@3fa45024d651ad1d8c8d85ebd32920c2f83bf274#egg=babbage==0.6.0
     # via -r requirements.in
 banal==1.0.6
     # via normality

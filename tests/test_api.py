@@ -72,6 +72,23 @@ class TestAPI:
         assert int(res.json['cells'][0]['value_usd.sum']) == 174739435, res.json['cells'][0]
 
 
+    def test_get_drilldowns_empty_cut(self, import_transactions, client):
+        """
+        All the WB transactions have no provider organisation.
+        All the WB budgets have provider organisation 40.
+        """
+        res = client.get(url_for('babbage_api.aggregate', name='iatiline',
+            drilldown='recipient_country_or_region',
+            cut='provider_organisation_type.code:""'))
+        assert len(res.json['cells']) == 1, res.json
+        assert int(res.json['cells'][0]['value_usd.sum']) == 116739436, res.json
+        res = client.get(url_for('babbage_api.aggregate', name='iatiline',
+            drilldown='recipient_country_or_region',
+            cut='provider_organisation_type.code:"40"'))
+        assert len(res.json['cells']) == 1, res.json
+        assert int(res.json['cells'][0]['value_usd.sum']) == 58000000, res.json
+
+
     def test_get_drilldowns_rollups(self, import_transactions, client):
         res = client.get(url_for('babbage_api.aggregate', name='iatiline',
             drilldown='recipient_country_or_region',
