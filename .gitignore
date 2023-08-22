@@ -11,3 +11,4 @@ model_template.json
 .ackrc
 .idea
 *.py~
+rates.csv

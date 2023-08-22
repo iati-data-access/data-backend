@@ -44,7 +44,7 @@ def get_groups_or_none(possible_match, index):
     return None
 
 
-def setup_db():
+def create_database():
     db.create_all()
 
 
@@ -55,20 +55,22 @@ def drop_db():
 def add_or_update_dataset(csv_file, status='processing'):
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
     dataset_id = f"{dataset_type}-{dataset_country}"
-    dataset = Dataset.query.filter_by(
-        id=dataset_id).first()
+    dataset = Dataset.query.filter_by(id=dataset_id).first()
+
     if dataset is None:
         dataset = Dataset()
         dataset.id = dataset_id
         dataset.dataset_type = dataset_type
         dataset.country = dataset_country
         dataset.created_at = datetime.datetime.utcnow()
+
     if status == 'processing':
         dataset.processing_at = datetime.datetime.now()
         dataset.status = 1
     elif status == 'complete':
         dataset.updated_at = datetime.datetime.now()
         dataset.status = 2
+
     db.session.add(dataset)
     db.session.commit()
 
@@ -79,20 +81,21 @@ def delete_dataset(csv_file, inserted_ids):
     dataset_type, dataset_country = re.match("(.*)-(.*).csv", csv_file).groups()
     if dataset_type == 'budget':
         q = sa.sql.expression.select(IATILine.id).where(
-            IATILine.recipient_country_or_region==dataset_country,
-            IATILine.transaction_type=='budget'
-        ).order_by(IATILine.id)
+            IATILine.recipient_country_or_region == dataset_country,
+            IATILine.transaction_type == 'budget'
+        ).order_by(IATILine.id)  # sjk: now that 'id' is a hash, its unclear whether this ordering does anything useful
         identifiers_budgets = [row.id for row in db.session.execute(q)]
         identifiers_to_delete = list(filter(lambda identifier: identifier not in inserted_ids, identifiers_budgets))
     else:
         q = sa.sql.expression.select(IATILine.id).where(
-            IATILine.recipient_country_or_region==dataset_country,
-            IATILine.transaction_type!='budget'
+            IATILine.recipient_country_or_region == dataset_country,
+            IATILine.transaction_type != 'budget'
         ).order_by(IATILine.id)
         identifiers_transactions = set([row.id for row in db.session.execute(q)])
         identifiers_to_delete = list(filter(lambda identifier: identifier not in inserted_ids, identifiers_transactions))
     print("There are identifiers to delete", identifiers_to_delete)
-    if len(identifiers_to_delete) == 0: return
+    if len(identifiers_to_delete) == 0:
+        return
     statement = sa.delete(IATILine).where(
         IATILine.id.in_(identifiers_to_delete))
     db.session.execute(statement)
@@ -100,8 +103,8 @@ def delete_dataset(csv_file, inserted_ids):
 
 
 def row_from_csv(row, codelists, reporting_organisation,
-    provider_organisations, receiver_organisations,
-    langs = ['en', 'fr', 'es', 'pt']):
+                 provider_organisations, receiver_organisations,
+                 langs=['en', 'fr', 'es', 'pt']):
     il = {}
     for key, value in row.items():
         map_keys = {
@@ -166,24 +169,55 @@ def row_from_csv(row, codelists, reporting_organisation,
 
 
 @timeit
-def import_all_activities(start_at='', end_at='', force_update=False):
+def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_update=False):
+    """Iterates over activity CSV files and imports them into DB using ``import_activities_from_single_csv``
+
+    Iterates over the CSV files produced by ``iatikit`` and stored in ``output/csv/activities``.
+
+    :param start_at_filename: The filename in output/csv to start processing at. If empty, start at the first file.
+    :type start_at_filename: str
+    :param end_at_filename: The filename in output/csv to end processing at. If empty, run until the last file.
+    :type end_at_filename: str
+    :param force_update: If true, activities already in the DB will be deleted and re-imported
+    :type force_update: bool
+    """
+
     files_to_import = sorted(os.listdir('output/csv/activities/'))
-    if start_at != '':
-        start = False
-    else: start = True
+    if start_at_filename != '':
+        started = False
+    else:
+        started = True
+
     for csv_file in files_to_import:
-        if not csv_file.endswith('.csv'): continue
-        if (csv_file != start_at) and (start == False):
+        if not csv_file.endswith('.csv'):
             continue
-        start = time.time()
-        import_activities(csv_file=csv_file, force_update=force_update)
-        end = time.time()
-        print(f"Processed {csv_file} in {end-start}s")
-        if (csv_file == end_at): break
+        if (csv_file != start_at_filename) and (not started):
+            continue
+
+        started = True
+        start_time = time.time()
+        import_activities_from_single_csv(csv_file=csv_file, force_update=force_update)
+        end_time = time.time()
+
+        print(f"Processed {csv_file} in {end_time-start_time}s")
+        if csv_file == end_at_filename:
+            break
 
 
 @timeit(arguments_to_output=['csv_file'])
-def import_activities(csv_file, force_update=False, directory=os.path.join('output', 'csv', 'activities')):
+def import_activities_from_single_csv(csv_file,
+                                      force_update=False,
+                                      directory=os.path.join('output', 'csv', 'activities')):
+    """Imports the activities data from a single CSV file into the ``iati_line`` table in the DB
+
+    :param csv_file: The activity filename to import.
+    :type csv_file: str
+    :param force_update: If true, activities already in the DB will be deleted and re-imported
+    :type force_update: bool
+    :param directory: The directory in which to look for the activity CSV file; can be overridden to allow for testing.
+    :type directory: str
+    """
+
     reporting_organisation_ref = None
     iati_identifiers = set()
     csv_file_path = os.path.join(directory, csv_file)
@@ -192,19 +226,20 @@ def import_activities(csv_file, force_update=False, directory=os.path.join('outp
         activities = []
         reporting_organisation_ref = csv_file.split('.csv')[0]
         q = sa.sql.expression.select(IATIActivity.iati_identifier, IATIActivity._hash).where(
-            IATIActivity.reporting_organisation==reporting_organisation_ref
+            IATIActivity.reporting_organisation == reporting_organisation_ref
         )
         existing_activities_hashes = dict([(activity.iati_identifier, activity._hash) \
-            for activity in db.session.execute(q)])
+                                           for activity in db.session.execute(q)])
+
         for activity_row in csvreader:
             iati_identifier = activity_row['iati_identifier']
-            if iati_identifier in iati_identifiers: # Ignore duplicates
+            if iati_identifier in iati_identifiers:  # Ignore duplicates
                 continue
             iati_identifiers.add(iati_identifier)
-            if (activity_row['hash'] == existing_activities_hashes.get(activity_row['iati_identifier'])
-                ) and (force_update is False):
+            if activity_row['hash'] == existing_activities_hashes.get(activity_row['iati_identifier']) \
+                    and not force_update:
                 continue
-            activities.append(add_or_update_activity(activity_row))
+            activities.append(map_csv_dict_row_to_db_dict(activity_row))
 
         print(f"Inserting / updating {len(activities)} activities")
         if len(activities) > 0:
@@ -240,28 +275,28 @@ def iso_date(value):
     return datetime.datetime.strptime(value, '%Y-%m-%d').date()
 
 
-def add_or_update_activity(activity_row):
+def map_csv_dict_row_to_db_dict(activity_csv_row):
     activity = {}
-    activity['iati_identifier'] = activity_row['iati_identifier']
-    activity['title'] = activity_row['title#en']
-    activity['title_fr'] = activity_row['title#fr']
-    activity['title_es'] = activity_row['title#es']
-    activity['title_pt'] = activity_row['title#pt']
-    activity['description'] = activity_row['description#en']
-    activity['description_fr'] = activity_row['description#fr']
-    activity['description_es'] = activity_row['description#es']
-    activity['description_pt'] = activity_row['description#pt']
-    activity['glide'] = activity_row['GLIDE']
-    activity['hrp'] = activity_row['HRP']
-    activity['location'] = activity_row['location']
-    activity['_hash'] = activity_row['hash']
-    activity['reporting_organisation'] = activity_row['reporting_org_ref']
+    activity['iati_identifier'] = activity_csv_row['iati_identifier']
+    activity['title'] = activity_csv_row['title#en']
+    activity['title_fr'] = activity_csv_row['title#fr']
+    activity['title_es'] = activity_csv_row['title#es']
+    activity['title_pt'] = activity_csv_row['title#pt']
+    activity['description'] = activity_csv_row['description#en']
+    activity['description_fr'] = activity_csv_row['description#fr']
+    activity['description_es'] = activity_csv_row['description#es']
+    activity['description_pt'] = activity_csv_row['description#pt']
+    activity['glide'] = activity_csv_row['GLIDE']
+    activity['hrp'] = activity_csv_row['HRP']
+    activity['location'] = activity_csv_row['location']
+    activity['_hash'] = activity_csv_row['hash']
+    activity['reporting_organisation'] = activity_csv_row['reporting_org_ref']
     try:
-        activity['start_date'] = iso_date(activity_row['start_date'])
+        activity['start_date'] = iso_date(activity_csv_row['start_date'])
     except ValueError:
         activity['start_date'] = None
     try:
-        activity['end_date'] = iso_date(activity_row['end_date'])
+        activity['end_date'] = iso_date(activity_csv_row['end_date'])
     except ValueError:
         activity['end_date'] = None
     return activity
@@ -270,8 +305,7 @@ def add_or_update_activity(activity_row):
 def get_reporting_org(reporting_orgs, row):
     ro_row = row['reporting_org#en']
     if ro_row not in reporting_orgs:
-        ro_row_ref = get_groups_or_none(re.match(r"(.*) \[(.*)\]",
-                ro_row), 1)
+        ro_row_ref = get_groups_or_none(re.match(r"(.*) \[(.*)\]", ro_row), 1)
         reporting_orgs[ro_row] = ro_row_ref
     return reporting_orgs, reporting_orgs.get(ro_row)
 
@@ -367,18 +401,17 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
 
 @timeit(arguments_to_output=['csv_file'])
 def import_from_csv(csv_file, codelists,
-        langs=['en', 'fr', 'es', 'pt'],
-        directory=os.path.join('output', 'csv')):
+                    langs=['en', 'fr', 'es', 'pt'],
+                    directory=os.path.join('output', 'csv')):
     add_or_update_dataset(csv_file=csv_file, status='processing')
     df = get_dataframe(csv_file=csv_file, langs=langs, directory=directory)
     print(f"Creating provider organisations")
-    provider_organisations = get_organisations(df=df,
-        provider_receiver='provider', langs=langs)
-    receiver_organisations = get_organisations(df=df,
-        provider_receiver='receiver', langs=langs)
-    inserted_ids = insert_or_update_rows(df=df, codelists=codelists,
-        provider_organisations=provider_organisations,
-        receiver_organisations=receiver_organisations)
+    provider_organisations = get_organisations(df=df, provider_receiver='provider', langs=langs)
+    receiver_organisations = get_organisations(df=df, provider_receiver='receiver', langs=langs)
+    inserted_ids = insert_or_update_rows(df=df,
+                                         codelists=codelists,
+                                         provider_organisations=provider_organisations,
+                                         receiver_organisations=receiver_organisations)
     delete_dataset(csv_file=csv_file, inserted_ids=inserted_ids)
     add_or_update_dataset(csv_file=csv_file, status='complete')
 
@@ -389,8 +422,7 @@ def fetch_data():
 
 def process_data(langs=['en', 'fr', 'es', 'pt']):
     os.makedirs('output/csv/', exist_ok=True)
-    iatiflattener.FlattenIATIData(refresh_rates=True,
-        langs=langs)
+    iatiflattener.FlattenIATIData(refresh_rates=True, langs=langs)
 
 
 def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
@@ -404,18 +436,7 @@ def group_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt']):
 
 
 @timeit
-def import_activities_files(force_update=False):
-    print("Loading and updating all activities...")
-    activity_files_to_import = sorted(os.listdir('output/csv/activities/'))
-    for activity_csv_file in activity_files_to_import:
-        if not activity_csv_file.endswith('.csv'): continue
-        import_activities(csv_file=activity_csv_file,
-            force_update=force_update)
-
-
-@timeit
-def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'],
-        force_update=False, update_activities=True):
+def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'], force_update=False):
     codelists = {
         "reporting_organisation_group": set([item.code for item in ReportingOrganisationGroup.query.all()]),
         "reporting_organisation": set([item.code for item in ReportingOrganisation.query.all()]),
@@ -430,16 +451,24 @@ def import_all(start_at='', end_at='', langs=['en', 'fr', 'es', 'pt'],
         "sector": set([item.code for item in Sector.query.all()]),
         "recipient_country_or_region": set([item.code for item in RecipientCountryorRegion.query.all()])
     }
-    if update_activities:
-        import_activities_files(force_update)
 
     files_to_import = sorted(os.listdir('output/csv/'))
+
     if start_at != '':
-        start = False
-    else: start = True
+        started = False
+    else:
+        started = True
+
     for csv_file in files_to_import:
-        if not csv_file.endswith('.csv'): continue
-        if (csv_file != start_at) and (start == False):
+        if not csv_file.endswith('.csv'):
             continue
+
+        if (csv_file != start_at) and not started:
+            continue
+
+        started = True
+
         import_from_csv(csv_file=csv_file, codelists=codelists)
-        if (csv_file == end_at): break
+
+        if csv_file == end_at:
+            break

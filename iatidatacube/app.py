@@ -18,15 +18,18 @@ def create_app(config_object='config'):
     register_responses(app)
     return app
 
+
 def register_commands(app):
     """Register Click commands."""
     app.cli.add_command(commands.setup_codelists)
+    app.cli.add_command(commands.create_db)
     app.cli.add_command(commands.drop_all)
     app.cli.add_command(commands.update)
     app.cli.add_command(commands.download)
     app.cli.add_command(commands.process)
     app.cli.add_command(commands.group)
     app.cli.add_command(commands.update_activities_only)
+
 
 def register_blueprints(app):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])

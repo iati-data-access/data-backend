@@ -142,3 +142,9 @@ flask group
 ```
 flask drop-all
 ```
+
+7. To recreate the database after running the ``flask drop-all`` command, run the following:
+
+```
+flask create-db
+```

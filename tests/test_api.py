@@ -42,9 +42,9 @@ class TestAPI:
 
     @pytest.fixture
     def import_activities(self):
-        yield import_data.import_activities(csv_file='44000.csv',
-            force_update=False,
-            directory=os.path.join('tests', 'fixtures', 'activities', 'csv'))
+        yield import_data.import_activities_from_single_csv(csv_file='44000.csv',
+                                                            force_update=False,
+                                                            directory=os.path.join('tests', 'fixtures', 'activities', 'csv'))
         for table in [IATILine, IATIActivity, ProviderOrganisation,
             ReceiverOrganisation]:
             db.session.execute(sa.delete(table))
