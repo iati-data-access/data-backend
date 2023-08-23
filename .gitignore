@@ -10,3 +10,4 @@ generate_model.py
 model_template.json
 .ackrc
 .idea
+*.py~

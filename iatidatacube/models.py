@@ -238,8 +238,8 @@ class IATIActivity(db.Model):
     __table_args__ = (
         sa.Index('ix_iati_activity_title', sa.text("left(title, 100)")),
         sa.Index('ix_iati_activity_title_fr', sa.text("left(title_fr, 100)")),
-        sa.Index('ix_iati_activity_title_es', sa.text("left(title_pt, 100)")),
-        sa.Index('ix_iati_activity_title_pt', sa.text("left(title_es, 100)")),
+        sa.Index('ix_iati_activity_title_es', sa.text("left(title_es, 100)")),
+        sa.Index('ix_iati_activity_title_pt', sa.text("left(title_pt, 100)")),
     )
 
 

@@ -16,19 +16,21 @@ source ./pyenv/bin/activate
 pip install -r requirements.txt
 ```
 
-NB1: on OSX, you may have to install PostgreSQL bindings separately:
+**Note 1: on OSX, you may have to install PostgreSQL bindings separately:**
 
 ```
 pip install psycopg2-binary --force-reinstall --no-cache-dir
 ```
 
-On Ubuntu, you may need to install `libpq-dev` for `psycopg2` to build:
+**Note 2: on Ubuntu, you may need to install `libpq-dev` for `psycopg2` to build:**
 
 ```
 sudo apt install libpq-dev
 ```
 
-NB2: This tool currently depends on `grako 3.10.1` which is not compatible with Python 3.10 or greater.
+**Note 3: This tool is not compatible with Python 3.10 or greater.**
+
+This is because it depends on `grako 3.10.1` which, due to the way it imports collections, isn't compatible with Python 3.10 or greater.
 
 
 2. Set up a database:
@@ -109,6 +111,8 @@ flask setup-codelists
 flask update
 ```
 
+Note that the `flask update` command takes several hours to run.  
+
 But you might prefer to load only some files, or load files in different processes. For that, you can add `-s` for the first (starting) file you would like to process, and `-e` for the last (ending) file you would like to process. For example, to load all country transaction files, we would run:
 
 ```
@@ -119,6 +123,12 @@ And to load all country budget files:
 
 ```
 flask update -s budget-AD.csv -e budget-ZW.csv
+```
+
+It is also possible to update only the activities with the following command:
+
+```
+flask update-activities-only
 ```
 
 5. You should then run the following script to convert the CSV files into grouped XLSX files:
