@@ -1,7 +1,8 @@
 """Click commands."""
 import click
 from flask.cli import with_appcontext
-from iatidatacube.import_data import create_database, drop_db, import_all, fetch_data, process_data, group_all, import_activities_from_csvs
+from iatidatacube.import_data import (create_database, drop_db, fetch_data, group_all, import_activities_from_csvs,
+                                      import_budgets_transactions_from_csvs, process_data)
 from iatidatacube.import_codelists import import_codelists
 
 
@@ -90,9 +91,7 @@ def update(start_at, end_at, force_update, dont_update_codelists, dont_update_ac
     if not dont_update_activities:
         import_activities_from_csvs(force_update=force_update)
 
-    import_all(start_at=start_at, end_at=end_at,
-               langs=['en', 'fr', 'es', 'pt'],
-               force_update=force_update)
+    import_budgets_transactions_from_csvs(start_at_filename=start_at, end_at_filename=end_at)
 
 
 @click.command()

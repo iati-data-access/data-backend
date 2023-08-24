@@ -166,6 +166,8 @@ class ReportingOrganisationGroup(db.Model):
 
 
 class Dataset(db.Model):
+    """Model for the dataset table, which stores metadata for when each budget and transaction file was processed"""
+
     __tablename__="dataset"
     id = sa.Column(sa.UnicodeText, primary_key=True)
     dataset_type = sa.Column(sa.UnicodeText, nullable=False)

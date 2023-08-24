@@ -52,14 +52,14 @@ class TestAPI:
 
     @pytest.fixture
     def import_transactions(self, codelists, import_activities):
-        import_data.import_from_csv(csv_file='transaction-LR.csv',
-            codelists=codelists,
-            langs=['en', 'fr', 'es', 'pt'],
-            directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
-        yield import_data.import_from_csv(csv_file='budget-LR.csv',
-            codelists=codelists,
-            langs=['en', 'fr', 'es', 'pt'],
-            directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
+        import_data.import_budgets_transactions_from_single_csv(csv_file='transaction-LR.csv',
+                                                                codelists=codelists,
+                                                                langs=['en', 'fr', 'es', 'pt'],
+                                                                directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
+        yield import_data.import_budgets_transactions_from_single_csv(csv_file='budget-LR.csv',
+                                                                      codelists=codelists,
+                                                                      langs=['en', 'fr', 'es', 'pt'],
+                                                                      directory=os.path.join('tests', 'fixtures', 'transactions', 'csv'))
         for table in [IATILine, ProviderOrganisation,
             ReceiverOrganisation]:
             db.session.execute(sa.delete(table))
