@@ -21,9 +21,9 @@ class TestLoadData:
 
     @pytest.fixture
     def import_activities(self, codelists_data):
-        yield import_data.import_activities(csv_file='44000.csv',
-            force_update=False,
-            directory=os.path.join('tests', 'fixtures', 'activities', 'csv'))
+        yield import_data.import_activities_from_single_csv(csv_file='44000.csv',
+                                                            force_update=False,
+                                                            directory=os.path.join('tests', 'fixtures', 'activities', 'csv'))
         for table in [IATILine, IATIActivity, ProviderOrganisation,
             ReceiverOrganisation]:
             db.session.execute(sa.delete(table))
@@ -40,9 +40,9 @@ class TestLoadData:
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity.title == 'LR-Agriculture & Infrastructure Development  Project'
-        import_data.import_activities(csv_file='44000.csv',
-            force_update=False,
-            directory=os.path.join('tests', 'fixtures', 'activities', 'csv_update'))
+        import_data.import_activities_from_single_csv(csv_file='44000.csv',
+                                                      force_update=False,
+                                                      directory=os.path.join('tests', 'fixtures', 'activities', 'csv_update'))
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity.title == 'UPDATED-LR-Agriculture & Infrastructure Development  Project'
@@ -53,9 +53,9 @@ class TestLoadData:
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity.title == 'LR-Agriculture & Infrastructure Development  Project'
-        import_data.import_activities(csv_file='44000.csv',
-            force_update=True,
-            directory=os.path.join('tests', 'fixtures', 'activities', 'csv_update_force'))
+        import_data.import_activities_from_single_csv(csv_file='44000.csv',
+                                                      force_update=True,
+                                                      directory=os.path.join('tests', 'fixtures', 'activities', 'csv_update_force'))
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity.title == 'FORCE-UPDATE-LR-Agriculture & Infrastructure Development  Project'
@@ -66,9 +66,9 @@ class TestLoadData:
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity is not None
-        import_data.import_activities(csv_file='44000.csv',
-            force_update=True,
-            directory=os.path.join('tests', 'fixtures', 'activities', 'csv_delete'))
+        import_data.import_activities_from_single_csv(csv_file='44000.csv',
+                                                      force_update=True,
+                                                      directory=os.path.join('tests', 'fixtures', 'activities', 'csv_delete'))
         activity = IATIActivity.query.filter_by(
             iati_identifier='44000-P104716').first()
         assert activity is None
