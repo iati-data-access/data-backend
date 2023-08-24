@@ -191,7 +191,8 @@ def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_
     :type start_at_filename: str
     :param end_at_filename: The filename in output/csv to end processing at. If empty, run until the last file.
     :type end_at_filename: str
-    :param force_update: If true, activities already in the DB will be deleted and re-imported
+    :param force_update: If true, activities already in the DB will be deleted and re-imported (regardless of whether
+    the hash has changed, which is by design, to allow activities to be reloaded when import logic changes).
     :type force_update: bool
     """
 
