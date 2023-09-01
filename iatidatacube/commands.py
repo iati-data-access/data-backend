@@ -65,7 +65,7 @@ def process():
     - transactions (IATI Activity XML Path: //transaction) are grouped by region or country (stored as
       ``transaction-CODE.csv``, where CODE is a region or country code); transactions are split over sectors and
       quarters, so there may be multiple transaction rows for a given IATI transaction (they can also be split
-      over regions/countries). The original value will be pro-rated out; the sum of the various rows will add up
+      over regions/countries). The original value will be prorated out; the sum of the various rows will add up
       to the original value of the transaction.
 
     See https://github.com/iati-data-access/iati-flattener. The relevant code is in the ``process_package`` function

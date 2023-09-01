@@ -10,7 +10,7 @@ Disk space requirements (possibly useful for developers who need to run it local
 
 ## Installation
 
-1. Set up a virtual environment and install the requirements:
+### 1. Set up a virtual environment and install the requirements:
 
 ```
 virtualenv ./pyenv
@@ -24,36 +24,42 @@ pip install -r requirements.txt
 pip install psycopg2-binary --force-reinstall --no-cache-dir
 ```
 
-**Note 2: on Ubuntu, you may need to install `libpq-dev` for `psycopg2` to build:**
+**Note 2: you need a C compiler and Python bindings to build some of the dependencies (including `psycopg2`). 
+On a fresh install of Ubuntu, for example, you may need to run:**
 
 ```
+sudo apt install gcc
 sudo apt install libpq-dev
 ```
 
 **Note 3: This tool is not compatible with Python 3.10 or greater.**
 
-This is because it depends on `grako 3.10.1` which, due to the way it imports collections, isn't compatible with Python 3.10 or greater.
+This is because it depends on `grako 3.10.1` which, due to the way it imports collections, isn't compatible with 
+Python 3.10 or greater. This means you will need to install Python 3.9 to run `CDFD`. Note that this means Python has to
+be installed manually on the current recommended versions of Ubuntu (20, 22). Also note that while there are 3rd party
+repository packages which allow easy installation of any version of Python (including 3.9), they do not currently (as 
+of Sept 2023) work with Ubuntu 23. 
 
 
-2. Set up a database:
+### 2. Set up a database:
 
 ```
 psql createdb iatidatacube
 ```
 
-3. Adjust config file if necessary.
+### 3. Adjust config file if necessary.
 
 ```
 cp config.py.tmpl config.py
 ```
 
-4. Install nginx and [uwsgi](https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html) - you can use and adjust the following templates:
+### 4. Install nginx and [uwsgi](https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html) - you can use and adjust the following templates:
 
 * cdfd.nginx.conf -> nginx config file
 * cdfd_uwsgi.ini -> uwsgi
 * cdfd.service -> systemd service
 
-5. Setup [certbot](https://certbot.eff.org/instructions)
+### 5. Setup [certbot](https://certbot.eff.org/instructions)
 
 
 ## Running tests
