@@ -325,7 +325,7 @@
             "key_attribute": "id",
             "label_attribute": "name_en",
             "label": "Provider Organisation",
-            "join_column": "receiver_organisation_id"
+            "join_column": "provider_organisation_id"
         },
         "provider_organisation_type": {
             "attributes": {
