@@ -177,7 +177,7 @@ def map_budget_transaction_csv_row_to_db_dict(row, codelists, reporting_organisa
     il['provider_organisation_id'] = make_organisations_hash(
         dict([(f'provider_org#{lang}', row[f'provider_org#{lang}']) for lang in langs]))
     il['receiver_organisation_id'] = make_organisations_hash(
-        dict([(f'provider_org#{lang}', row[f'receiver_org#{lang}']) for lang in langs]))
+        dict([(f'receiver_org#{lang}', row[f'receiver_org#{lang}']) for lang in langs]))
     return il
 
 
