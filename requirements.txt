@@ -53,7 +53,7 @@ grako==3.10.1
     # via babbage
 greenlet==2.0.2
     # via sqlalchemy
-iatiflattener==0.10.8
+iatiflattener==0.10.9
     # via -r requirements.in
 iatikit==3.3.1
     # via

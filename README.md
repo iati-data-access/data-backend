@@ -8,6 +8,11 @@ It also provides a set of import scripts, based on parsing data generated from t
 
 Disk space requirements (possibly useful for developers who need to run it locally): as of Aug 2023, the tool downloads all the IATI XML files and unpacks them, requiring ~11 Gb; the CSV files it generates take up ~40 Gb, and the XLSX files it generates another ~10 Gb; both the CSVs and the XLSXs are then duplicated when `flask group` finishes, being copied to a `web` directory, so ~100 Gb is needed for these files if each stage of the app is run to completion; the Postgres database will takes up ~25 Gb; so total disk space needed to run all aspects of the tool to their completion is about ~140 Gb.  
 
+The tool makes available for bulk download a ZIP file with all the Excel spreadsheets it has created, one ZIP file per language which CDFD supports. They are located at:
+
+`output/web/xlsx/cdfd-xlsx-files-en.zip`
+
+
 ## Installation
 
 ### 1. Set up a virtual environment and install the requirements:
