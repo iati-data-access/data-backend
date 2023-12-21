@@ -143,9 +143,12 @@ def map_budget_transaction_csv_row_to_db_dict(row, codelists, reporting_organisa
             il[_key] = {'0': False, '1': True, 0: False, 1: True}[value]
         elif _key in ('value_usd', 'value_eur', 'value_local_currrency'):
             il[_key] = float(value)
+        elif _key in ('reporting_organisation_type'):
+            if value not in codelists[_key]:
+                value = ''
+            il[_key] = value
         elif _key in ("aid_type", "finance_type", "flow_type",
                       "transaction_type", "sector_category", "sector",
-                      "reporting_organisation_type",
                       "provider_organisation_type",
                       "receiver_organisation_type"):
             if value not in codelists[_key]:
@@ -401,8 +404,14 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
             return set()
         stmt = postgres_insert(IATILine).values(rows_to_insert)
         stmt = stmt.on_conflict_do_nothing(index_elements=['id'])
-        db.session.execute(stmt)
-        db.session.commit()
+        try:
+            db.session.execute(stmt)
+            db.session.commit()
+        except sa.exc.IntegrityError as e:
+            print(f"ERROR: Integrity error inserting/updating row in iati_line: {str(e)[0:2000]}")
+            db.session.rollback()
+            return set()
+        
         return set([row['id'] for row in rows_to_insert])
 
     for i, row in df.iterrows():
@@ -411,8 +420,10 @@ def insert_or_update_rows(df, codelists, provider_organisations, receiver_organi
             print(f"Reporting organisation {reporting_org} not recognised, skipping.")
             continue
         try:
-            data = map_budget_transaction_csv_row_to_db_dict(row, codelists, reporting_org,
-                                                             provider_organisations, receiver_organisations)
+            data = map_budget_transaction_csv_row_to_db_dict(row, codelists, 
+                                                             reporting_org,
+                                                             provider_organisations, 
+                                                             receiver_organisations)
             rows_to_insert.append(data)
         except Exception as e:
             print(f"Couldn't get data for row {i}, exception was {e}")
