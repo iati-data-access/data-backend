@@ -133,3 +133,23 @@ class TestAPI:
         'Value (USD) (2013 Q1)', 'Value (USD) (2013 Q2)']
         assert xlsx_as_csv[0]['Value (USD) (2013 Q1)'] == 1984341
         assert xlsx_as_csv[0]['Value (USD) (2013 Q2)'] == 595716
+
+
+    @pytest.mark.parametrize("rollup_name,rollup_values", [
+        ("sector_category.code", ["120","150","160","310","430"]),
+        ("sector.code", ["12220","15170","16010","31120","43040"]),
+        ("year.year", ["2007","2008","2009","2010","2011","2012","2013","2014","2015"]),
+        ("quarter.quarter", ["Q1","Q2","Q3","Q4"]),
+        ("calendar_year_and_quarter", ["2013 Q1","2013 Q2","2013 Q3","2013 Q4"]),
+        ])
+    def test_get_drilldowns_rollups_various(self, import_transactions, client, rollup_name, rollup_values):
+        rollup_values_cuts = ";".join([f'"{v}"' for v in rollup_values])
+        rollup_values_rollups = ",".join([f'["{v}"]' for v in rollup_values])
+
+        res = client.get(url_for('babbage_api.aggregate', name='iatiline',
+            drilldown='recipient_country_or_region',
+            cut=f'transaction_type.code:"3";"4"|{rollup_name}:{rollup_values_cuts}',
+            rollup=f'{rollup_name}:[{rollup_values_rollups}]',
+            aggregates='value_usd.sum',
+            format='xlsx', lang='en'))
+        assert res.status_code == 200
