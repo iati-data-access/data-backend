@@ -153,3 +153,12 @@ class TestAPI:
             aggregates='value_usd.sum',
             format='xlsx', lang='en'))
         assert res.status_code == 200
+
+
+    def test_get_empty_xlsx(self, import_transactions, client):
+        res = client.get(url_for('babbage_api.aggregate', name='iatiline',
+            drilldown='recipient_country_or_region',
+            cut='transaction_type.code:"3";"4"|calendar_year_and_quarter:"9999 Q1"',
+            aggregates='value_usd.sum',
+            format='xlsx', lang='en'))
+        assert res.status_code == 404
