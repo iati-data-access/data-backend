@@ -119,3 +119,17 @@ class TestAPI:
         assert xlsx_as_csv[0]['Value (USD) (Décaissement, Dépenses)'] == 58742699
         assert xlsx_as_csv[0]['Value (USD) (Budget)'] == 58000000
 
+
+    def test_get_drilldowns_rollups_xlsx_quarters(self, import_transactions, client):
+        res = client.get(url_for('babbage_api.aggregate', name='iatiline',
+            drilldown='recipient_country_or_region',
+            cut='transaction_type.code:"3";"4"|calendar_year_and_quarter:"2013 Q1";"2013 Q2"',
+            rollup='calendar_year_and_quarter:[["2013 Q1"],["2013 Q2"]]',
+            aggregates='value_usd.sum',
+            format='xlsx', lang='en'))
+        xlsx_res = res.get_data()
+        xlsx_as_csv = xlsx_to_csv.get_data(xlsx_res, xlsx_res, 'Data')
+        assert list(xlsx_as_csv[0].keys()) == ['Recipient Country or Region',
+        'Value (USD) (2013 Q1)', 'Value (USD) (2013 Q2)']
+        assert xlsx_as_csv[0]['Value (USD) (2013 Q1)'] == 1984341
+        assert xlsx_as_csv[0]['Value (USD) (2013 Q2)'] == 595716
