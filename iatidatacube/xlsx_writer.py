@@ -29,9 +29,20 @@ def serialise(args, data):
             _r_dimension, _r_attribute = rollup.split('.')
         else:
             _r_dimension = rollup
-        get_rollup_values_from_db = babbage.get_cube('iatiline').members(_r_dimension)
-        rollup_values_from_db = dict([(t[f'{_r_dimension}.code'],
-            t[f'{_r_dimension}.name_{lang}']) for t in get_rollup_values_from_db['data']])
+        get_rollup_values_from_db = babbage.get_cube('iatiline').members(_r_dimension,
+            page_size=100000)
+        # Some rollups do not have language-specific labels,
+        # e.g. years, quarters, multi-country
+        if (f'{_r_dimension}.code' in get_rollup_values_from_db['fields']) and \
+            (f'{_r_dimension}.name_{lang}' in get_rollup_values_from_db['fields']):
+            key = f'{_r_dimension}.code'
+            label = f'{_r_dimension}.name_{lang}'
+        else:
+            # Get the first field that matches this dimension
+            key = get_rollup_values_from_db['fields'][0]
+            label = get_rollup_values_from_db['fields'][0]
+        rollup_values_from_db = dict([(t[key],
+            t[label]) for t in get_rollup_values_from_db['data']])
 
     for row in data:
         _l = {}
