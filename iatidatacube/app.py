@@ -47,7 +47,7 @@ def register_responses(app):
         if request.args.get('format') == 'xlsx':
             response_json = response.get_json(force=True)
             if len(response_json.get('cells', []) + response_json.get('data', [])) == 0:
-                response = make_response(jsonify(msg="There are no results mathing your selection."), 404)
+                response = make_response(jsonify(msg="There are no results matching your selection."), 404)
                 return response
             if 'cells' in response_json:
                 data = list(xlsx_writer.serialise(request.args, response_json['cells']))
