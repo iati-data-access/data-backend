@@ -153,11 +153,11 @@ flask group
 6. If you want to delete everything from the database and start again, you can run:
 
 ```
-flask drop-all
+flask db downgrade base
 ```
 
 7. To recreate the database after running the ``flask drop-all`` command, run the following:
 
 ```
-flask create-db
+flask db upgrade
 ```

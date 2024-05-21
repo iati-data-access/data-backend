@@ -12,3 +12,4 @@ model_template.json
 .idea
 *.py~
 rates.csv
+.venv
