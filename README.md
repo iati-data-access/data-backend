@@ -58,6 +58,13 @@ psql createdb iatidatacube
 cp config.py.tmpl config.py
 ```
 
+CDFD uses `iatikit` to download the IATI XML data. As of version `3.5.0`, it is
+possible to customise where `iatikit` downloads the ZIP file from using an
+`iatikit.ini` config file. This file should be placed in the directory from
+which `python` is run when running the CDFD `flask` commands which should
+normally be the root of the CDFD repo folder.
+
+
 ### 4. Install nginx and [uwsgi](https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html) - you can use and adjust the following templates:
 
 * cdfd.nginx.conf -> nginx config file
@@ -95,7 +102,7 @@ pytest
 flask db upgrade
 ```
 
-## Importing data
+## Importing and processing data
 
 This is still a little bit of a work in progress. CDFD Backend is currently using CSV versions of the same files which are [publicly available](https://countrydata.iatistandard.org/). The advantage of these files, compared with the XLSX files, is that they are much faster to read and parse, and that they contain codes separately from the labels, which is more convenient for storing in the database.
 
@@ -149,6 +156,20 @@ flask update-activities-only
 ```
 flask group
 ```
+
+
+## Running the API
+
+Once you have run through the steps above, all the data has been processed. If
+you want to run a local copy of the API (which allows the frontend to access the
+processed data), you can run:
+
+```bash
+gunicorn --env DEBUG=True --env ALLOWED_HOSTS=localhost --env LANG=en_US.utf8   -b 0.0.0.0:5000 -w 5 --timeout 60 liveserver:application
+```
+
+(Note that you need to keep the Postgres database that was used in the above steps running).
+
 
 6. If you want to delete everything from the database and start again, you can run:
 
