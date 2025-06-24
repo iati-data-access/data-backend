@@ -55,7 +55,7 @@ greenlet==2.0.2
     # via sqlalchemy
 iatiflattener==0.10.11
     # via -r requirements.in
-iatikit==3.3.1
+iatikit==3.5.0
     # via
     #   -r requirements.in
     #   iatiflattener

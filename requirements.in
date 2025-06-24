@@ -8,7 +8,7 @@ psycopg2==2.9.7
 python-dateutil==2.8.2
 requests>=2.31.0
 openpyxl==3.0.10
-iatikit==3.3.1
+iatikit==3.5.0
 iatiflattener==0.10.11
 pyexcelerate==0.10.0
 numpy==1.23.5
