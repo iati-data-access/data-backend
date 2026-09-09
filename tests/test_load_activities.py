@@ -29,6 +29,16 @@ class TestLoadData:
             db.session.execute(sa.delete(table))
 
 
+    @pytest.fixture
+    def import_activities_long_field(self):
+        yield import_data.import_activities_from_single_csv(csv_file='XM-DAC-41317.csv',
+                                                            force_update=False,
+                                                            directory=os.path.join('tests', 'fixtures', 'activities', 'csv_long_field'))
+        for table in [IATILine, IATIActivity, ProviderOrganisation,
+            ReceiverOrganisation]:
+            db.session.execute(sa.delete(table))
+
+
     def test_activities_loaded(self, import_activities):
         """There should be two activities"""
         activities = IATIActivity.query.all()
@@ -74,3 +84,30 @@ class TestLoadData:
         assert activity is None
         activities = IATIActivity.query.all()
         assert len(activities) == 1
+
+
+    def test_activities_with_long_description_field(self, import_activities_long_field):
+        """Activities should load even when a narrative exceeds the default CSV field
+        size limit
+
+        Some publishers put a whole project document in a description narrative, which
+        is larger than the 131072 default of ``csv.field_size_limit``. Reading the CSV
+        then raises ``_csv.Error``, which aborted the entire import run.
+        See https://github.com/iati-data-access/data-backend/issues/38
+
+        The fixture holds three consecutive activities taken from the publisher whose
+        data caused that failure, the middle one carrying the long narratives. They are
+        truncated to 135000 characters -- just over the limit -- to keep the fixture to
+        a reasonable size.
+        """
+        activities = IATIActivity.query.all()
+        assert len(activities) == 3
+
+        activity = IATIActivity.query.filter_by(
+            iati_identifier='XM-DAC-41317-SAP058').first()
+        assert len(activity.description) == 135000
+
+        # The activity following the oversized one must still be imported: it was
+        # everything after the failure point that was lost in production.
+        assert IATIActivity.query.filter_by(
+            iati_identifier='XM-DAC-41317-FP082').first() is not None
