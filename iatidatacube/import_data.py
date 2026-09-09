@@ -20,6 +20,12 @@ from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from functools import wraps
 import time
 
+# The largest field measured across the whole corpus was ~453,500 characters, so
+# anything beyond the limit below is not a plausible narrative and the file is more
+# likely to be corrupt.
+CSV_FIELD_SIZE_LIMIT = 2_000_000
+csv.field_size_limit(CSV_FIELD_SIZE_LIMIT)
+
 
 def timeit(f_py=None, arguments_to_output=[]):
     def decorator(func):
@@ -185,10 +191,16 @@ def map_budget_transaction_csv_row_to_db_dict(row, codelists, reporting_organisa
 
 
 @timeit
-def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_update=False):
+def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_update=False,
+                                directory=os.path.join('output', 'csv', 'activities')):
     """Iterates over activity CSV files and imports them into DB by calling ``import_activities_from_single_csv``
 
     Iterates over the CSV files produced by ``iatikit`` and stored in ``output/csv/activities``.
+
+    A file that cannot be imported is skipped and the run carries on. A file large enough to
+    breach ``CSV_FIELD_SIZE_LIMIT`` is not a plausible activity file, and one unreadable
+    publisher must not stop every other publisher, nor stop the budgets and transactions that
+    are imported after this. 
 
     :param start_at_filename: The filename in output/csv to start processing at. If empty, start at the first file.
     :type start_at_filename: str
@@ -197,13 +209,19 @@ def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_
     :param force_update: If true, activities already in the DB will be deleted and re-imported (regardless of whether
     the hash has changed, which is by design, to allow activities to be reloaded when import logic changes).
     :type force_update: bool
+    :param directory: The directory to look for activity CSV files in; can be overridden to allow for testing.
+    :type directory: str
+    :return: The filenames that could not be imported.
+    :rtype: list
     """
 
-    files_to_import = sorted(os.listdir('output/csv/activities/'))
+    files_to_import = sorted(os.listdir(directory))
     if start_at_filename != '':
         started = False
     else:
         started = True
+
+    failed_files = []
 
     for csv_file in files_to_import:
         if not csv_file.endswith('.csv'):
@@ -213,12 +231,27 @@ def import_activities_from_csvs(start_at_filename='', end_at_filename='', force_
 
         started = True
         start_time = time.time()
-        import_activities_from_single_csv(csv_file=csv_file, force_update=force_update)
+        try:
+            import_activities_from_single_csv(csv_file=csv_file, force_update=force_update,
+                                              directory=directory)
+        except Exception as e:
+            # Roll back, or every file after this one fails on the broken session too.
+            db.session.rollback()
+            failed_files.append(csv_file)
+            print(f"ERROR: Could not import activities from {csv_file}, skipping it. "
+                  f"{type(e).__name__}: {e}")
+            continue
         end_time = time.time()
 
         print(f"Processed {csv_file} in {end_time - start_time}s")
         if csv_file == end_at_filename:
             break
+
+    if failed_files:
+        print(f"WARNING: {len(failed_files)} activity file(s) could not be imported and were "
+              f"skipped: {', '.join(failed_files)}")
+
+    return failed_files
 
 
 @timeit(arguments_to_output=['csv_file'])
